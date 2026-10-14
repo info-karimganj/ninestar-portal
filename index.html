@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nine Star Technologies | Official Developer Organization & Software Studio</title>
+
+<!-- Standard & Google Play Verification SEO Metadata -->
+<meta name="description" content="Official organization and application developer portal for Nine Star Technologies. Discover our Google Play applications, privacy policies, terms of service, and company credentials.">
+<meta name="keywords" content="Nine Star Technologies, Mobile Applications, Android Developer, Google Play Console, Enterprise Software, Privacy Policy">
+<meta name="author" content="Nine Star Technologies">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Nine Star Technologies | Official Developer Organization">
+<meta property="og:description" content="Official developer portal for Nine Star Technologies. Discover our Google Play apps, privacy policies, and verified company credentials.">
+<meta property="og:site_name" content="Nine Star Technologies">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nine Star Technologies | Official Developer Organization">
+<meta name="twitter:description" content="Official developer portal for Nine Star Technologies. Google Play verified organization.">
+
+<!-- JSON-LD Structured Data for Google Verification -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Nine Star Technologies",
+  "legalName": "Nine Star Technologies",
+  "url": "https://ninestartechnologies.com",
+  "logo": "https://ninestartechnologies.com/logo.png",
+  "description": "Premier digital software development and mobile publishing studio delivering high-reliability applications for Android and Google Play.",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "Customer Support & Legal Inquiries",
+    "email": "support@ninestartechnologies.com",
+    "availableLanguage": ["English"]
+  }
+}
+</script>
+
+<!-- Supabase JS Client v2 (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --bg:#faf7f0;--bg2:#f1ece0;--surface:#ffffff;--ink:#17140f;--muted:#6a6455;--line:#e3dcc9;--gold:#9a7424;--gold2:#c9a24b;--on-gold:#ffffff;--glow:rgba(201,162,75,.22);
+  --success:#2e7d32;--success-bg:#e8f5e9;--danger:#d32f2f;--danger-bg:#ffebee;--warning:#ed6c02;--warning-bg:#fff3e0;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0a0a0c;--bg2:#101014;--surface:#141418;--ink:#f3eee2;--muted:#a39d8d;--line:#2a2820;--gold:#d8b560;--gold2:#f0d58c;--on-gold:#14110a;--glow:rgba(216,181,96,.16);
+    --success:#66bb6a;--success-bg:#1b2e1e;--danger:#ef5350;--danger-bg:#2e1515;--warning:#ffa726;--warning-bg:#2e2213;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0a0a0c;--bg2:#101014;--surface:#141418;--ink:#f3eee2;--muted:#a39d8d;--line:#2a2820;--gold:#d8b560;--gold2:#f0d58c;--on-gold:#14110a;--glow:rgba(216,181,96,.16);
+  --success:#66bb6a;--success-bg:#1b2e1e;--danger:#ef5350;--danger-bg:#2e1515;--warning:#ffa726;--warning-bg:#2e2213;
+}
+:root[data-theme="light"]{
+  --bg:#faf7f0;--bg2:#f1ece0;--surface:#ffffff;--ink:#17140f;--muted:#6a6455;--line:#e3dcc9;--gold:#9a7424;--gold2:#c9a24b;--on-gold:#ffffff;--glow:rgba(201,162,75,.22);
+  --success:#2e7d32;--success-bg:#e8f5e9;--danger:#d32f2f;--danger-bg:#ffebee;--warning:#ed6c02;--warning-bg:#fff3e0;
+}
+
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--sans);overflow-x:hidden}
+a{color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:100;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px;height:68px}
+.logo{font-family:var(--serif);font-size:19px;letter-spacing:.02em;text-decoration:none;display:flex;align-items:center;gap:10px;font-weight:600}
+.logo i{font-style:normal;color:var(--gold);font-size:22px;display:inline-block;animation:spin 14s linear infinite}
+nav{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+nav a{text-decoration:none;color:var(--muted);font-size:14.5px;position:relative;transition:color .25s;font-weight:500}
+nav a:not(.btn):hover{color:var(--ink)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:999px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:var(--on-gold)!important;font-weight:600;font-size:14.5px;text-decoration:none;border:0;cursor:pointer;transition:transform .25s,box-shadow .25s,filter .25s;box-shadow:0 6px 24px -8px var(--gold)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px -8px var(--gold);filter:brightness(1.05)}
+.btn.ghost{background:transparent;color:var(--ink)!important;border:1px solid var(--line);box-shadow:none}
+.btn.ghost:hover{border-color:var(--gold);background:var(--bg2)}
+.btn.small{padding:6px 14px;font-size:13px;border-radius:8px}
+.btn.danger{background:var(--danger);color:#fff!important;box-shadow:none}
+.btn.danger:hover{opacity:.9}
+.btn.secondary{background:var(--bg2);color:var(--ink)!important;border:1px solid var(--line);box-shadow:none}
+
+.hero{position:relative;padding:96px 0 88px;overflow:hidden}
+.hero::before{content:"";position:absolute;width:640px;height:640px;right:-160px;top:-140px;background:radial-gradient(circle,var(--glow),transparent 65%);animation:drift 12s ease-in-out infinite alternate;pointer-events:none}
+.hero-grid{position:relative;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center}
+.kicker{display:inline-block;color:var(--gold);font-size:14px;letter-spacing:.06em;margin-bottom:18px;text-transform:uppercase;font-weight:600}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(36px,6vw,68px);line-height:1.08;margin:0 0 22px;letter-spacing:-.015em}
+.hero h1 span{background:linear-gradient(100deg,var(--gold),var(--gold2),var(--gold));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
+.hero p{max-width:34em;color:var(--muted);font-size:18px;margin:0 0 32px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+
+.orbit{position:relative;width:min(340px,80vw);aspect-ratio:1;margin:0 auto}
+.ring{position:absolute;inset:0;border-radius:50%;border:1px solid var(--line);animation:spin 40s linear infinite}
+.ring.r2{inset:15%;animation-duration:28s;animation-direction:reverse}
+.ring.r3{inset:30%;animation-duration:18s}
+.ring b{position:absolute;left:50%;top:50%;color:var(--gold);font-size:16px;line-height:1;margin:-8px 0 0 -8px}
+.r1 b:nth-child(1){transform:rotate(0) translateY(-170px)}.r1 b:nth-child(2){transform:rotate(120deg) translateY(-170px)}.r1 b:nth-child(3){transform:rotate(240deg) translateY(-170px)}
+.r2 b:nth-child(1){transform:rotate(40deg) translateY(-119px)}.r2 b:nth-child(2){transform:rotate(160deg) translateY(-119px)}.r2 b:nth-child(3){transform:rotate(280deg) translateY(-119px)}
+.r3 b:nth-child(1){transform:rotate(80deg) translateY(-68px)}.r3 b:nth-child(2){transform:rotate(200deg) translateY(-68px)}.r3 b:nth-child(3){transform:rotate(320deg) translateY(-68px)}
+.core{position:absolute;inset:40%;border-radius:50%;display:grid;place-items:center;font-size:34px;color:var(--on-gold);background:linear-gradient(135deg,var(--gold2),var(--gold));box-shadow:0 0 60px var(--glow);animation:pulse 4s ease-in-out infinite}
+
+section{padding:88px 0;border-top:1px solid var(--line)}
+section.alt{background:var(--bg2)}
+.sec-head{margin-bottom:36px}
+h2{font-family:var(--serif);font-weight:400;font-size:clamp(28px,4.4vw,44px);line-height:1.15;margin:0 0 14px;letter-spacing:-.01em}
+.lead{color:var(--muted);max-width:40em;margin:0;font-size:17px}
+.rule{width:48px;height:2px;background:linear-gradient(90deg,var(--gold2),var(--gold));margin:0 0 20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+
+.card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:30px;transition:transform .35s,border-color .35s,box-shadow .35s;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-6px);border-color:var(--gold);box-shadow:0 24px 50px -28px var(--gold)}
+.card h3{font-family:var(--serif);font-weight:400;font-size:23px;margin:0 0 10px}
+.card p{margin:0 0 20px;color:var(--muted);flex-grow:1}
+.card-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto}
+.icon{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;font-family:var(--serif);font-size:24px;color:var(--on-gold);background:linear-gradient(135deg,var(--gold2),var(--gold));margin-bottom:18px}
+.badge{display:inline-block;font-size:12.5px;color:var(--gold);border:1px solid var(--line);border-radius:999px;padding:3px 12px;margin-bottom:14px;align-self:flex-start}
+
+.about{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+.about p{margin:0;color:var(--muted);font-size:18px}
+.facts{display:grid;gap:14px}
+.fact{padding:18px 22px;border-left:2px solid var(--gold);background:var(--surface);border-radius:0 14px 14px 0;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.fact strong{display:block;font-family:var(--serif);font-weight:400;font-size:19px;margin-bottom:4px}
+.fact span{color:var(--muted);font-size:15px}
+
+dl{margin:0;display:grid;grid-template-columns:max-content 1fr;gap:14px 28px}
+dt{color:var(--muted);font-weight:500}dd{margin:0;overflow-wrap:anywhere}
+.note{color:var(--muted);font-size:14px;margin:22px 0 0}
+
+footer{border-top:1px solid var(--line);padding:36px 0;color:var(--muted);font-size:14px}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.foot-links{display:flex;gap:18px}
+.foot-links a{color:var(--muted);text-decoration:none}
+.foot-links a:hover{color:var(--ink)}
+
+/* SPA Hash Routing Subpages & Admin */
+.page{display:none;padding:64px 0}
+body.subpage .home{display:none}
+body.subpage .page.active{display:block}
+
+/* Legal text styling */
+.legal-box{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:40px;margin-top:24px}
+.legal-box h3{font-family:var(--serif);font-size:22px;margin:30px 0 12px;color:var(--ink)}
+.legal-box h3:first-child{margin-top:0}
+.legal-box p, .legal-box li{color:var(--muted);line-height:1.8}
+.legal-box ul{padding-left:20px;margin:12px 0}
+
+/* Admin CMS Interface */
+.admin-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:32px;margin-bottom:32px;box-shadow:0 12px 40px -15px rgba(0,0,0,0.06)}
+.admin-header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-bottom:18px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+label{font-size:13.5px;font-weight:600;color:var(--ink)}
+input[type="text"], input[type="email"], input[type="password"], input[type="url"], select, textarea{
+  background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 14px;color:var(--ink);font-family:var(--sans);font-size:14.5px;outline:none;transition:border-color .2s;
+}
+input:focus, select:focus, textarea:focus{border-color:var(--gold)}
+textarea{resize:vertical;min-height:90px}
+.table-responsive{overflow-x:auto;margin-top:20px;border-radius:12px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;text-align:left;font-size:14px}
+th, td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{background:var(--bg2);color:var(--muted);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.03em}
+tr:last-child td{border-bottom:0}
+tr:hover td{background:color-mix(in srgb,var(--bg) 50%,transparent)}
+.status-pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;text-transform:capitalize}
+.status-pill.published{background:var(--success-bg);color:var(--success)}
+.status-pill.draft{background:var(--warning-bg);color:var(--warning)}
+.status-pill.archived{background:var(--danger-bg);color:var(--danger)}
+.toast{position:fixed;bottom:24px;right:24px;z-index:9999;padding:12px 20px;border-radius:12px;font-weight:500;box-shadow:0 12px 30px rgba(0,0,0,.2);display:none;animation:fadeIn .3s}
+.toast.success{background:var(--success);color:#fff}
+.toast.error{background:var(--danger);color:#fff}
+.toast.info{background:var(--gold);color:var(--on-gold)}
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+.config-banner{background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning);padding:14px 18px;border-radius:12px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shine{to{background-position:200% center}}
+@keyframes drift{from{transform:translate(0,0)}to{transform:translate(-50px,40px)}}
+@keyframes pulse{50%{transform:scale(1.07)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+@media (max-width:760px){
+  .hero-grid,.about{grid-template-columns:1fr}
+  .orbit{order:-1;width:min(240px,64vw)}
+  .nav{height:auto;padding:12px 0;flex-wrap:wrap}.hero{padding:48px 0 56px}section{padding:64px 0}
+  .card-links{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<!-- Header Navigation -->
+<header>
+  <div class="wrap nav">
+    <a href="#" class="logo" id="nav-brand"><i>✦</i> Nine Star Technologies</a>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#apps">Apps</a>
+      <a href="#services">Services</a>
+      <a href="#contact">Contact</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#terms">Terms</a>
+      <a href="#admin" class="btn ghost small" id="nav-admin-btn">Admin Portal</a>
+    </nav>
+  </div>
+</header>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast"></div>
+
+<!-- MAIN PUBLIC HOME VIEW -->
+<div class="home">
+  <!-- Hero Section -->
+  <section class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="kicker">Google Play Verified Software Studio</span>
+        <h1>Engineering <span>Next-Generation</span> Digital Systems</h1>
+        <p>Nine Star Technologies delivers high-reliability mobile applications, intelligent utility suites, and enterprise cloud solutions designed for world-class scale and privacy.</p>
+        <div class="cta">
+          <a href="#apps" class="btn">Explore Our Applications</a>
+          <a href="#contact" class="btn ghost">Corporate Verification</a>
+        </div>
+      </div>
+      <div class="orbit" aria-hidden="true">
+        <div class="ring r1"><b>★</b><b>★</b><b>★</b></div>
+        <div class="ring r2"><b>✦</b><b>✦</b><b>✦</b></div>
+        <div class="ring r3"><b>•</b><b>•</b><b>•</b></div>
+        <div class="core">✦</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Us Section -->
+  <section id="about" class="alt">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="rule"></div>
+        <h2>Architected for Reliability</h2>
+        <p class="lead">Built on uncompromising standards of software integrity, security, and user-centric architecture.</p>
+      </div>
+      <div class="about">
+        <div>
+          <p>At Nine Star Technologies, we build digital products that bridge elegant user experiences with rigorous performance. Our software engineering standards ensure privacy, high uptime, and zero-compromise security across all mobile platforms.</p>
+          <p style="margin-top:16px">As a verified organization, every application published in our ecosystem complies with Google Play Policies, local data protection frameworks (GDPR, CCPA), and global software distribution standards.</p>
+        </div>
+        <div class="facts">
+          <div class="fact">
+            <strong>100% Policy Compliant</strong>
+            <span>Rigorous adherence to Google Play developer standards & privacy frameworks.</span>
+          </div>
+          <div class="fact">
+            <strong>Security-First Architecture</strong>
+            <span>Client-side encryption, safe local storage, and transparent permissions.</span>
+          </div>
+          <div class="fact">
+            <strong>Continuous Lifecycle Support</strong>
+            <span>Active maintenance, fast patch cycles, and responsive user feedback loops.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Apps / Products Showcase Section (Dynamic via Supabase) -->
+  <section id="apps">
+    <div class="wrap">
+      <div class="sec-head" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
+        <div>
+          <div class="rule"></div>
+          <h2>Published Applications</h2>
+          <p class="lead">Official applications designed, built, and maintained by Nine Star Technologies.</p>
+        </div>
+        <div id="live-indicator" style="font-size:13.5px;color:var(--muted);display:flex;align-items:center;gap:6px">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--success)"></span> Live Sync
+        </div>
+      </div>
+
+      <!-- App Grid Container (Dynamically rendered) -->
+      <div class="grid" id="apps-grid">
+        <!-- Skeleton / Loading State -->
+        <div class="card" style="opacity:.6">
+          <div class="badge">Loading catalog...</div>
+          <div class="icon">✦</div>
+          <h3>Connecting to database...</h3>
+          <p>Retrieving verified applications from Nine Star Technologies repository.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Enterprise Services Section -->
+  <section id="services" class="alt">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="rule"></div>
+        <h2>Enterprise Services & Capabilities</h2>
+        <p class="lead">Core competencies delivering technical excellence from concept to production.</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div class="icon">📱</div>
+          <h3>Native & Hybrid Mobile Apps</h3>
+          <p>Architecting fluid, high-performance Android applications with modern reactive frameworks, background tasks, and low latency caching.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🔒</div>
+          <h3>Data Governance & Compliance</h3>
+          <p>End-to-end data lifecycle design ensuring consent management, pseudonymization, automated data deletion, and rigorous audit trails.</p>
+        </div>
+        <div class="card">
+          <div class="icon">⚡</div>
+          <h3>Cloud Sync & Serverless Systems</h3>
+          <p>Real-time data replication, robust offline-first synchronization protocols, and zero-maintenance scalable backend infrastructure.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact & Verification Section -->
+  <section id="contact">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="rule"></div>
+        <h2>Organization Credentials & Contact</h2>
+        <p class="lead">Official corporate details for Google Play Console verification, partnership, and legal inquiries.</p>
+      </div>
+      <div class="card" style="padding:36px">
+        <dl>
+          <dt>Legal Entity</dt>
+          <dd><strong>Nine Star Technologies</strong></dd>
+          <dt>Entity Status</dt>
+          <dd><span class="badge" style="margin:0;border-color:var(--success);color:var(--success)">Verified Developer Organization</span></dd>
+          <dt>Support & Legal Email</dt>
+          <dd><a href="mailto:support@ninestartechnologies.com" style="color:var(--gold);text-decoration:underline">support@ninestartechnologies.com</a></dd>
+          <dt>Primary Domain</dt>
+          <dd><a href="https://ninestartechnologies.com" target="_blank" rel="noopener">ninestartechnologies.com</a></dd>
+          <dt>Google Play Developer ID</dt>
+          <dd>Nine Star Technologies</dd>
+          <dt>Corporate Jurisdiction</dt>
+          <dd>Global Software Studio & Application Publishing</dd>
+        </dl>
+        <p class="note">To report safety violations, security vulnerabilities, or account deletion requests, please contact our response team at <a href="mailto:support@ninestartechnologies.com">support@ninestartechnologies.com</a> with the application name and package identifier.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- SUBPAGE: PRIVACY POLICY -->
+<div id="page-privacy" class="page">
+  <div class="wrap">
+    <a href="#" class="btn ghost small" style="margin-bottom:24px">← Back to Overview</a>
+    <div class="sec-head">
+      <div class="rule"></div>
+      <h2>Privacy Policy</h2>
+      <p class="lead">Official Data Protection & Privacy Governance for Nine Star Technologies</p>
+      <small style="color:var(--muted)">Effective Date: January 1, 2025 | Last Updated: October 2026</small>
+    </div>
+
+    <div class="legal-box">
+      <h3>1. Commitment to Privacy</h3>
+      <p>Nine Star Technologies ("we", "our", or "us") is dedicated to protecting user privacy across all our published mobile applications, websites, and affiliated digital software products. This Privacy Policy details the types of information we collect, how it is safeguarded, and how you can exercise your legal rights regarding your data.</p>
+
+      <h3>2. Scope & Applicable Applications</h3>
+      <p>This policy applies to all applications published by Nine Star Technologies on the Google Play Store and other authorized platforms. Each specific app might feature localized supplementary disclosures depending on distinct device permissions requested.</p>
+
+      <h3>3. Information We Collect</h3>
+      <ul>
+        <li><strong>Information You Provide Voluntarily:</strong> When you register an account, contact customer service, or submit inquiries, we may process your email address, name, and communication logs.</li>
+        <li><strong>Device and Telemetry Data:</strong> We may collect non-personal device identifiers, operating system version, app version, language settings, and anonymous crash analytics (e.g., via Google Play Services) to resolve bugs and optimize responsiveness.</li>
+        <li><strong>No Sensitive Personal Data:</strong> We do not sell, rent, or trade your personal information. We do not collect health data, financial account credentials, or exact real-time GPS locations unless an individual application specifically and explicitly requests your opt-in consent for a core feature.</li>
+      </ul>
+
+      <h3>4. Legal Bases for Processing</h3>
+      <p>We process information pursuant to legitimate business interests (troubleshooting, continuous product optimization), performance of contracts (enabling requested application capabilities), and user consent where legally mandated by regional privacy frameworks including GDPR and CCPA.</p>
+
+      <h3>5. Third-Party Services & Libraries</h3>
+      <p>Our applications may interface with trusted service providers strictly to perform core operational functions:</p>
+      <ul>
+        <li>Google Play Services (Authentication, in-app purchases, crash telemetry)</li>
+        <li>Supabase (Encrypted database management and secure synchronization)</li>
+      </ul>
+
+      <h3>6. Data Retention & Account Deletion Requests</h3>
+      <p>We retain data only as long as necessary to fulfill the purposes outlined in this policy or comply with regulatory mandates. Users have the right to request deletion of their account and associated telemetry data at any time by emailing <a href="mailto:support@ninestartechnologies.com" style="color:var(--gold)">support@ninestartechnologies.com</a> with the subject line <em>"Data Deletion Request"</em>. Requests are handled within 30 business days.</p>
+
+      <h3>7. Security Safeguards</h3>
+      <p>We implement industry-standard encryption protocols (TLS/HTTPS in transit and AES-256 for resting data) to prevent unauthorized interception, alteration, or disclosure.</p>
+
+      <h3>8. Contact Us</h3>
+      <p>If you have any questions or regulatory concerns regarding this Privacy Policy, please reach out to our privacy compliance officer at:</p>
+      <p><strong>Nine Star Technologies</strong><br>Email: <a href="mailto:support@ninestartechnologies.com">support@ninestartechnologies.com</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- SUBPAGE: TERMS & CONDITIONS -->
+<div id="page-terms" class="page">
+  <div class="wrap">
+    <a href="#" class="btn ghost small" style="margin-bottom:24px">← Back to Overview</a>
+    <div class="sec-head">
+      <div class="rule"></div>
+      <h2>Terms and Conditions</h2>
+      <p class="lead">User Agreement & Software Licensing for Nine Star Technologies Products</p>
+      <small style="color:var(--muted)">Effective Date: January 1, 2025</small>
+    </div>
+
+    <div class="legal-box">
+      <h3>1. Acceptance of Terms</h3>
+      <p>By downloading, installing, accessing, or using any software application or service published by Nine Star Technologies, you agree to be bound by these Terms and Conditions. If you do not accept these terms, you must discontinue use and uninstall our applications immediately.</p>
+
+      <h3>2. License Grant</h3>
+      <p>Nine Star Technologies grants you a revocable, non-exclusive, non-transferable, limited license to download, install, and operate the applications strictly for personal or authorized business use in accordance with these Terms and Google Play Developer Program Policies.</p>
+
+      <h3>3. Intellectual Property Rights</h3>
+      <p>All source code, user interface designs, animations, trademarks, icons, soundscapes, and visual aesthetics embodied in our applications are the exclusive intellectual property of Nine Star Technologies, protected by international copyright and intellectual property legislation.</p>
+
+      <h3>4. User Conduct & Prohibited Uses</h3>
+      <p>You agree not to reverse engineer, decompile, extract source code, modify, distribute, or create derivative works based on our software, nor bypass any security or license check systems.</p>
+
+      <h3>5. Disclaimer of Warranties</h3>
+      <p>Our applications and related services are provided on an "AS IS" and "AS AVAILABLE" basis without warranties of any kind, whether express or implied. Nine Star Technologies does not guarantee uninterrupted operation or error-free states.</p>
+
+      <h3>6. Limitation of Liability</h3>
+      <p>To the maximum extent permitted by applicable law, Nine Star Technologies shall not be liable for any indirect, incidental, special, or consequential damages resulting from the use or inability to use our applications.</p>
+
+      <h3>7. Governing Law</h3>
+      <p>These terms shall be governed by and construed under the applicable laws governing registered commercial enterprise software, without regard to conflict of law principles.</p>
+
+      <h3>8. Contact Information</h3>
+      <p>Inquiries regarding terms of service can be submitted directly to:<br>
+      <strong>Nine Star Technologies</strong><br>Email: <a href="mailto:support@ninestartechnologies.com">support@ninestartechnologies.com</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- SUBPAGE: ADMIN CMS (#admin) -->
+<div id="page-admin" class="page">
+  <div class="wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <a href="#" class="btn ghost small">← Return to Public Site</a>
+      <div id="auth-status-chip" style="font-size:13.5px;color:var(--muted)"></div>
+    </div>
+
+    <!-- Credentials Config Warning / Setup Modal (Displayed if user needs to connect Supabase) -->
+    <div id="config-banner" class="config-banner" style="display:none">
+      <div>
+        <strong>⚙️ Supabase Configuration Needed:</strong> Please set your Project URL and Public Anon Key in the Configuration panel below to connect your real-time database.
+      </div>
+      <button class="btn small secondary" onclick="toggleConfigPanel()">Configure</button>
+    </div>
+
+    <!-- Collapsible Settings Panel -->
+    <div id="config-panel" class="admin-card" style="display:none;background:var(--bg2)">
+      <div class="admin-header">
+        <div>
+          <h3 style="margin:0;font-family:var(--serif);font-size:20px">Supabase API Connection</h3>
+          <p style="margin:4px 0 0;font-size:13.5px;color:var(--muted)">Values are securely persisted in your browser's encrypted localStorage.</p>
+        </div>
+      </div>
+      <form id="form-config" onsubmit="handleSaveConfig(event)">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label for="cfg-url">Supabase Project URL</label>
+            <input type="url" id="cfg-url" placeholder="https://xyzcompany.supabase.co" required>
+          </div>
+          <div class="form-group full">
+            <label for="cfg-key">Supabase Public Anon Key</label>
+            <input type="text" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." required>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button type="submit" class="btn small">Save & Connect</button>
+          <button type="button" class="btn small ghost" onclick="toggleConfigPanel()">Close</button>
+          <button type="button" class="btn small danger" onclick="handleResetConfig()">Reset to Demo Defaults</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Admin State 1: Authentication Form (When Logged Out) -->
+    <div id="admin-login-view" class="admin-card" style="max-width:440px;margin:40px auto">
+      <div class="sec-head" style="margin-bottom:20px;text-align:center">
+        <div class="rule" style="margin:0 auto 16px"></div>
+        <h2 style="font-size:28px">Admin Verification</h2>
+        <p class="lead" style="font-size:15px">Sign in to manage Nine Star Technologies applications.</p>
+      </div>
+
+      <form id="form-login" onsubmit="handleLogin(event)">
+        <div class="form-group" style="margin-bottom:14px">
+          <label for="admin-email">Admin Email</label>
+          <input type="email" id="admin-email" placeholder="admin@ninestartechnologies.com" required autocomplete="email">
+        </div>
+        <div class="form-group" style="margin-bottom:22px">
+          <label for="admin-pass">Secure Password</label>
+          <input type="password" id="admin-pass" placeholder="••••••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn" id="btn-login-submit" style="width:100%">Sign In to CMS</button>
+      </form>
+      <div style="margin-top:18px;text-align:center;font-size:13px;color:var(--muted)">
+        <a href="javascript:void(0)" onclick="toggleConfigPanel()" style="text-decoration:underline">Configure Supabase API Keys</a>
+      </div>
+    </div>
+
+    <!-- Admin State 2: CMS Dashboard (When Authenticated) -->
+    <div id="admin-dashboard-view" style="display:none">
+      
+      <!-- Management Header -->
+      <div class="admin-card">
+        <div class="admin-header">
+          <div>
+            <span class="badge" style="border-color:var(--gold);margin-bottom:6px">Verified Administrative Session</span>
+            <h2 style="margin:0;font-size:30px">Application Catalog Manager</h2>
+            <p style="margin:4px 0 0;color:var(--muted)" id="admin-user-email">Signed in as administrator</p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button class="btn small secondary" onclick="toggleConfigPanel()">⚙️ API Settings</button>
+            <button class="btn small danger" onclick="handleLogout()">Sign Out</button>
+          </div>
+        </div>
+
+        <!-- Add / Edit Application Form -->
+        <h3 style="font-family:var(--serif);font-size:21px;margin:0 0 16px" id="form-app-heading">Add New Application</h3>
+        <form id="form-app" onsubmit="handleSaveApp(event)">
+          <input type="hidden" id="app-id" value="">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="app-title">Application Title *</label>
+              <input type="text" id="app-title" placeholder="e.g. StarPulse Scanner" required>
+            </div>
+            <div class="form-group">
+              <label for="app-category">Category *</label>
+              <input type="text" id="app-category" placeholder="e.g. Utilities & Productivity" required>
+            </div>
+            <div class="form-group">
+              <label for="app-icon">Icon Symbol / Emoji</label>
+              <input type="text" id="app-icon" placeholder="e.g. ✦, ⚡, 📱, 🛡️" value="✦" maxlength="4">
+            </div>
+            <div class="form-group">
+              <label for="app-badge">Badge Label</label>
+              <input type="text" id="app-badge" placeholder="e.g. Featured, Popular, New">
+            </div>
+            <div class="form-group">
+              <label for="app-status">Publish Status *</label>
+              <select id="app-status" required>
+                <option value="published">Published (Visible Publicly)</option>
+                <option value="draft">Draft (Admin Only)</option>
+                <option value="archived">Archived (Hidden)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="app-sort">Sort Order (Lower appears first)</label>
+              <input type="text" id="app-sort" placeholder="1" value="0">
+            </div>
+            <div class="form-group full">
+              <label for="app-desc">Description *</label>
+              <textarea id="app-desc" placeholder="Comprehensive application summary showcasing key features and value..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="app-play-url">Google Play Store URL</label>
+              <input type="url" id="app-play-url" placeholder="https://play.google.com/store/apps/details?id=...">
+            </div>
+            <div class="form-group">
+              <label for="app-privacy-url">Privacy Policy URL</label>
+              <input type="text" id="app-privacy-url" placeholder="#privacy or full URL" value="#privacy">
+            </div>
+            <div class="form-group">
+              <label for="app-terms-url">Terms of Service URL</label>
+              <input type="text" id="app-terms-url" placeholder="#terms or full URL" value="#terms">
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-top:12px">
+            <button type="submit" class="btn" id="btn-save-app">Save Application</button>
+            <button type="button" class="btn ghost" id="btn-cancel-edit" onclick="resetAppForm()" style="display:none">Cancel Edit</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Live Applications Table -->
+      <div class="admin-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+          <div>
+            <h3 style="margin:0;font-family:var(--serif);font-size:22px">Managed Applications</h3>
+            <p style="margin:4px 0 0;font-size:14px;color:var(--muted)">All records stored in Supabase with real-time replication.</p>
+          </div>
+          <button class="btn small ghost" onclick="fetchAppsList()">↻ Refresh List</button>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:60px">Icon</th>
+                <th>Title & Category</th>
+                <th>Status</th>
+                <th>Links</th>
+                <th>Order</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-apps-tbody">
+              <tr>
+                <td colspan="6" class="empty-state">Loading database records...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="wrap foot">
+    <div>
+      © <span id="current-year">2026</span> <strong>Nine Star Technologies</strong>. All rights reserved. Google Play is a trademark of Google LLC.
+    </div>
+    <div class="foot-links">
+      <a href="#about">About</a>
+      <a href="#apps">Apps</a>
+      <a href="#privacy">Privacy Policy</a>
+      <a href="#terms">Terms</a>
+      <a href="#admin">Admin</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Application Logic & Supabase Integration -->
+<script>
+// ==============================================================================
+// 1. CONFIGURATION & STATE MANAGEMENT
+// ==============================================================================
+const CONFIG_STORAGE_KEY = 'ninestar_supabase_config';
+const FALLBACK_CONFIG = {
+  // Demo Supabase project endpoints for initial preview (User can supply their own via UI)
+  supabaseUrl: 'https://demo-ninestar.supabase.co',
+  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy_anon_token_ninestar'
+};
+
+// Fallback seed apps in case remote Supabase is empty or initializing
+const DEFAULT_APPS = [
+  {
+    id: 'seed-1',
+    title: 'StarPulse Productivity',
+    category: 'Productivity & Utility',
+    description: 'Streamlined task & project orchestration designed for high-focus professionals with intelligent offline sync and encrypted cloud backups.',
+    icon_text: '⚡',
+    badge: 'Featured on Play Store',
+    play_store_url: 'https://play.google.com/store/apps/details?id=com.ninestar.starpulse',
+    privacy_policy_url: '#privacy',
+    terms_url: '#terms',
+    status: 'published',
+    sort_order: 1
+  },
+  {
+    id: 'seed-2',
+    title: 'Zenith Habit Tracker',
+    category: 'Lifestyle & Wellness',
+    description: 'Minimalist behavioral science tracker assisting users in building lasting habits with micro-journaling and ambient audio.',
+    icon_text: '✦',
+    badge: 'Popular',
+    play_store_url: 'https://play.google.com/store/apps/details?id=com.ninestar.zenith',
+    privacy_policy_url: '#privacy',
+    terms_url: '#terms',
+    status: 'published',
+    sort_order: 2
+  },
+  {
+    id: 'seed-3',
+    title: 'Constellation Finance',
+    category: 'Finance & Tools',
+    description: 'Smart budget allocation and multi-currency expense ledger with biometrics, bank-grade encryption, and automated export.',
+    icon_text: '◈',
+    badge: 'Latest Release',
+    play_store_url: 'https://play.google.com/store/apps/details?id=com.ninestar.constellation',
+    privacy_policy_url: '#privacy',
+    terms_url: '#terms',
+    status: 'published',
+    sort_order: 3
+  }
+];
+
+let supabaseClient = null;
+let currentSession = null;
+let cachedApps = [];
+let isUsingLocalFallback = false;
+
+// Initialize Supabase Client
+function initSupabase() {
+  const saved = localStorage.getItem(CONFIG_STORAGE_KEY);
+  let config = FALLBACK_CONFIG;
+  if (saved) {
+    try { config = JSON.parse(saved); } catch(e){}
+  }
+
+  // Populate config fields in UI
+  const urlEl = document.getElementById('cfg-url');
+  const keyEl = document.getElementById('cfg-key');
+  if (urlEl) urlEl.value = config.supabaseUrl || '';
+  if (keyEl) keyEl.value = config.supabaseAnonKey || '';
+
+  if (window.supabase && config.supabaseUrl && config.supabaseAnonKey && !config.supabaseUrl.includes('demo-ninestar')) {
+    try {
+      supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+      isUsingLocalFallback = false;
+      document.getElementById('config-banner').style.display = 'none';
+    } catch(err) {
+      console.warn('Supabase initialization failed:', err);
+      supabaseClient = null;
+      isUsingLocalFallback = true;
+    }
+  } else {
+    isUsingLocalFallback = true;
+    // Show configuration hint banner on admin
+    const banner = document.getElementById('config-banner');
+    if (banner) banner.style.display = 'flex';
+  }
+}
+
+// ==============================================================================
+// 2. SPA ROUTING SYSTEM (HASH-BASED)
+// ==============================================================================
+function handleRouting() {
+  const hash = window.location.hash.toLowerCase();
+  const pages = ['privacy', 'terms', 'admin'];
+  const body = document.body;
+
+  // Deactivate all subpages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+  if (pages.some(p => hash.startsWith('#' + p))) {
+    body.classList.add('subpage');
+    if (hash.startsWith('#privacy')) {
+      document.getElementById('page-privacy').classList.add('active');
+    } else if (hash.startsWith('#terms')) {
+      document.getElementById('page-terms').classList.add('active');
+    } else if (hash.startsWith('#admin')) {
+      document.getElementById('page-admin').classList.add('active');
+      checkAdminAuthState();
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    body.classList.remove('subpage');
+    // Scroll to specific section if anchored
+    if (hash && hash !== '#') {
+      const target = document.querySelector(hash);
+      if (target) {
+        setTimeout(() => target.scrollIntoView({ behavior: 'smooth' }), 50);
+      }
+    }
+  }
+}
+
+window.addEventListener('hashchange', handleRouting);
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('current-year').textContent = new Date().getFullYear();
+  initSupabase();
+  handleRouting();
+  fetchPublicApps();
+  setupRealtimeSubscription();
+});
+
+// ==============================================================================
+// 3. PUBLIC APPS SHOWCASE (RENDER & REAL-TIME)
+// ==============================================================================
+async function fetchPublicApps() {
+  const grid = document.getElementById('apps-grid');
+  
+  if (supabaseClient && !isUsingLocalFallback) {
+    try {
+      const { data, error } = await supabaseClient
+        .from('apps')
+        .select('*')
+        .eq('status', 'published')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      if (data && data.length > 0) {
+        cachedApps = data;
+        renderPublicApps(data);
+        return;
+      }
+    } catch (err) {
+      console.warn('Could not fetch from remote Supabase, falling back to local dataset:', err);
+    }
+  }
+
+  // Fallback to local storage or defaults
+  const localApps = getLocalApps().filter(a => a.status === 'published');
+  cachedApps = localApps;
+  renderPublicApps(localApps);
+}
+
+function renderPublicApps(apps) {
+  const grid = document.getElementById('apps-grid');
+  if (!apps || apps.length === 0) {
+    grid.innerHTML = `
+      <div class="card" style="grid-column:1/-1;text-align:center;padding:48px 24px">
+        <div class="icon" style="margin:0 auto 16px">✦</div>
+        <h3>Software Catalog Updating</h3>
+        <p>Our engineering team is currently deploying our latest Google Play builds. Please check back shortly.</p>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = apps.map(app => `
+    <div class="card" id="app-${escapeHtml(app.id)}">
+      ${app.badge ? `<span class="badge">${escapeHtml(app.badge)}</span>` : ''}
+      <div class="icon">${escapeHtml(app.icon_text || '✦')}</div>
+      <h3>${escapeHtml(app.title)}</h3>
+      <div style="font-size:13px;color:var(--gold);margin-top:-4px;margin-bottom:12px;font-weight:600">${escapeHtml(app.category || 'Mobile Application')}</div>
+      <p>${escapeHtml(app.description)}</p>
+      <div class="card-links">
+        ${app.play_store_url ? `
+          <a href="${escapeHtml(app.play_store_url)}" target="_blank" rel="noopener" class="btn small" style="text-decoration:none">
+            Google Play ↗
+          </a>
+        ` : `
+          <span class="btn small ghost" style="opacity:.6;cursor:default">Internal Release</span>
+        `}
+        ${app.privacy_policy_url ? `
+          <a href="${escapeHtml(app.privacy_policy_url)}" class="btn small ghost">Privacy Policy</a>
+        ` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// Real-time Postgres Changes Subscription
+function setupRealtimeSubscription() {
+  if (!supabaseClient || isUsingLocalFallback) return;
+
+  try {
+    supabaseClient
+      .channel('public:apps')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'apps' }, (payload) => {
+        console.log('Realtime update received:', payload);
+        fetchPublicApps();
+        if (window.location.hash.startsWith('#admin') && currentSession) {
+          fetchAppsList();
+        }
+        showToast('App catalog synchronized in real-time', 'info');
+      })
+      .subscribe();
+  } catch (err) {
+    console.warn('Realtime subscription error:', err);
+  }
+}
+
+// ==============================================================================
+// 4. ADMIN AUTHENTICATION
+// ==============================================================================
+async function checkAdminAuthState() {
+  const loginView = document.getElementById('admin-login-view');
+  const dashView = document.getElementById('admin-dashboard-view');
+  const userEmailChip = document.getElementById('auth-status-chip');
+  const adminUserEmail = document.getElementById('admin-user-email');
+
+  if (supabaseClient && !isUsingLocalFallback) {
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      currentSession = session;
+    } catch(e) {
+      currentSession = null;
+    }
+  } else {
+    // Local session simulation for demonstration / standalone operation
+    const localAuth = sessionStorage.getItem('ninestar_admin_auth');
+    if (localAuth) {
+      currentSession = { user: { email: localAuth } };
+    } else {
+      currentSession = null;
+    }
+  }
+
+  if (currentSession && currentSession.user) {
+    loginView.style.display = 'none';
+    dashView.style.display = 'block';
+    userEmailChip.innerHTML = `Logged in: <strong>${escapeHtml(currentSession.user.email)}</strong>`;
+    adminUserEmail.textContent = `Signed in as: ${currentSession.user.email}`;
+    fetchAppsList();
+  } else {
+    loginView.style.display = 'block';
+    dashView.style.display = 'none';
+    userEmailChip.textContent = 'Not authenticated';
+  }
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('admin-email').value.trim();
+  const password = document.getElementById('admin-pass').value;
+  const btn = document.getElementById('btn-login-submit');
+
+  btn.disabled = true;
+  btn.textContent = 'Verifying credentials...';
+
+  if (supabaseClient && !isUsingLocalFallback) {
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      currentSession = data.session;
+      showToast('Authentication successful!', 'success');
+      checkAdminAuthState();
+    } catch(err) {
+      showToast(err.message || 'Login failed. Please verify credentials.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Sign In to CMS';
+    }
+  } else {
+    // Local / Demo mode login logic
+    setTimeout(() => {
+      sessionStorage.setItem('ninestar_admin_auth', email);
+      currentSession = { user: { email } };
+      showToast('Signed in (Local Mode: Demo session active)', 'success');
+      btn.disabled = false;
+      btn.textContent = 'Sign In to CMS';
+      checkAdminAuthState();
+    }, 400);
+  }
+}
+
+async function handleLogout() {
+  if (supabaseClient && !isUsingLocalFallback) {
+    try {
+      await supabaseClient.auth.signOut();
+    } catch(e){}
+  }
+  sessionStorage.removeItem('ninestar_admin_auth');
+  currentSession = null;
+  showToast('Logged out of admin session.', 'info');
+  checkAdminAuthState();
+}
+
+// ==============================================================================
+// 5. ADMIN CRUD OPERATIONS
+// ==============================================================================
+async function fetchAppsList() {
+  const tbody = document.getElementById('admin-apps-tbody');
+  tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Fetching data from Supabase...</td></tr>`;
+
+  let apps = [];
+  if (supabaseClient && !isUsingLocalFallback) {
+    try {
+      const { data, error } = await supabaseClient
+        .from('apps')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      apps = data || [];
+    } catch(err) {
+      console.warn('Supabase fetch failed:', err);
+      apps = getLocalApps();
+    }
+  } else {
+    apps = getLocalApps();
+  }
+
+  if (apps.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No applications found. Add one above!</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = apps.map(app => `
+    <tr>
+      <td style="font-size:22px;text-align:center">${escapeHtml(app.icon_text || '✦')}</td>
+      <td>
+        <strong style="color:var(--ink);font-size:15px">${escapeHtml(app.title)}</strong>
+        <div style="font-size:12.5px;color:var(--muted)">${escapeHtml(app.category || 'General')}</div>
+        ${app.badge ? `<span style="font-size:11px;color:var(--gold);font-weight:600">[${escapeHtml(app.badge)}]</span>` : ''}
+      </td>
+      <td>
+        <span class="status-pill ${app.status}">${escapeHtml(app.status)}</span>
+      </td>
+      <td>
+        <div style="font-size:13px;display:flex;flex-direction:column;gap:3px">
+          ${app.play_store_url ? `<a href="${escapeHtml(app.play_store_url)}" target="_blank" style="color:var(--gold)">Play Store ↗</a>` : '<span style="color:var(--muted)">No Store URL</span>'}
+          <span style="color:var(--muted);font-size:11px">${escapeHtml(app.privacy_policy_url || '#privacy')}</span>
+        </div>
+      </td>
+      <td>${app.sort_order ?? 0}</td>
+      <td style="text-align:right">
+        <div style="display:flex;gap:6px;justify-content:flex-end">
+          <button class="btn small secondary" onclick="editAppById('${escapeHtml(app.id)}')">Edit</button>
+          <button class="btn small secondary" onclick="toggleAppStatus('${escapeHtml(app.id)}', '${app.status}')">
+            ${app.status === 'published' ? 'Draft' : 'Publish'}
+          </button>
+          <button class="btn small danger" onclick="deleteAppById('${escapeHtml(app.id)}')">Delete</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function handleSaveApp(e) {
+  e.preventDefault();
+  const id = document.getElementById('app-id').value;
+  const title = document.getElementById('app-title').value.trim();
+  const category = document.getElementById('app-category').value.trim();
+  const icon_text = document.getElementById('app-icon').value.trim() || '✦';
+  const badge = document.getElementById('app-badge').value.trim();
+  const status = document.getElementById('app-status').value;
+  const sort_order = parseInt(document.getElementById('app-sort').value, 10) || 0;
+  const description = document.getElementById('app-desc').value.trim();
+  const play_store_url = document.getElementById('app-play-url').value.trim();
+  const privacy_policy_url = document.getElementById('app-privacy-url').value.trim() || '#privacy';
+  const terms_url = document.getElementById('app-terms-url').value.trim() || '#terms';
+
+  const appData = {
+    title,
+    category,
+    icon_text,
+    badge,
+    status,
+    sort_order,
+    description,
+    play_store_url,
+    privacy_policy_url,
+    terms_url
+  };
+
+  const btn = document.getElementById('btn-save-app');
+  btn.disabled = true;
+  btn.textContent = 'Saving to database...';
+
+  try {
+    if (supabaseClient && !isUsingLocalFallback) {
+      if (id) {
+        // Update existing record
+        const { error } = await supabaseClient.from('apps').update(appData).eq('id', id);
+        if (error) throw error;
+        showToast('Application updated successfully!', 'success');
+      } else {
+        // Insert new record
+        const { error } = await supabaseClient.from('apps').insert([appData]);
+        if (error) throw error;
+        showToast('New application published to catalog!', 'success');
+      }
+    } else {
+      // Local fallback persistence
+      let localApps = getLocalApps();
+      if (id) {
+        localApps = localApps.map(a => a.id === id ? { ...a, ...appData } : a);
+      } else {
+        localApps.unshift({ id: 'app-' + Date.now(), ...appData });
+      }
+      saveLocalApps(localApps);
+      showToast('Saved to local catalog (Configure Supabase for cloud sync)', 'success');
+    }
+
+    resetAppForm();
+    fetchAppsList();
+    fetchPublicApps();
+  } catch(err) {
+    showToast(err.message || 'Error saving application', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save Application';
+  }
+}
+
+async function editAppById(id) {
+  let app = null;
+  if (supabaseClient && !isUsingLocalFallback) {
+    try {
+      const { data, error } = await supabaseClient.from('apps').select('*').eq('id', id).single();
+      if (error) throw error;
+      app = data;
+    } catch(e){}
+  }
+  if (!app) {
+    app = getLocalApps().find(a => a.id === id);
+  }
+
+  if (!app) {
+    showToast('Application not found', 'error');
+    return;
+  }
+
+  // Populate form
+  document.getElementById('app-id').value = app.id;
+  document.getElementById('app-title').value = app.title || '';
+  document.getElementById('app-category').value = app.category || '';
+  document.getElementById('app-icon').value = app.icon_text || '✦';
+  document.getElementById('app-badge').value = app.badge || '';
+  document.getElementById('app-status').value = app.status || 'published';
+  document.getElementById('app-sort').value = app.sort_order ?? 0;
+  document.getElementById('app-desc').value = app.description || '';
+  document.getElementById('app-play-url').value = app.play_store_url || '';
+  document.getElementById('app-privacy-url').value = app.privacy_policy_url || '#privacy';
+  document.getElementById('app-terms-url').value = app.terms_url || '#terms';
+
+  document.getElementById('form-app-heading').textContent = `Editing: ${app.title}`;
+  document.getElementById('btn-save-app').textContent = 'Update Application';
+  document.getElementById('btn-cancel-edit').style.display = 'inline-block';
+
+  window.scrollTo({ top: document.getElementById('form-app').offsetTop - 100, behavior: 'smooth' });
+}
+
+function resetAppForm() {
+  document.getElementById('form-app').reset();
+  document.getElementById('app-id').value = '';
+  document.getElementById('app-privacy-url').value = '#privacy';
+  document.getElementById('app-terms-url').value = '#terms';
+  document.getElementById('app-icon').value = '✦';
+  document.getElementById('app-sort').value = '0';
+  document.getElementById('form-app-heading').textContent = 'Add New Application';
+  document.getElementById('btn-save-app').textContent = 'Save Application';
+  document.getElementById('btn-cancel-edit').style.display = 'none';
+}
+
+async function toggleAppStatus(id, currentStatus) {
+  const newStatus = currentStatus === 'published' ? 'draft' : 'published';
+  if (supabaseClient && !isUsingLocalFallback) {
+    try {
+      const { error } = await supabaseClient.from('apps').update({ status: newStatus }).eq('id', id);
+      if (error) throw error;
+      showToast(`Status toggled to ${newStatus}`, 'info');
+      fetchAppsList();
+      fetchPublicApps();
+      return;
+    } catch(e){}
+  }
+
+  let local = getLocalApps();
+  local = local.map(a => a.id === id ? { ...a, status: newStatus } : a);
+  saveLocalApps(local);
+  showToast(`Status toggled to ${newStatus}`, 'info');
+  fetchAppsList();
+  fetchPublicApps();
+}
+
+async function deleteAppById(id) {
+  if (!confirm('Are you sure you want to permanently remove this application from the catalog?')) return;
+
+  if (supabaseClient && !isUsingLocalFallback) {
+    try {
+      const { error } = await supabaseClient.from('apps').delete().eq('id', id);
+      if (error) throw error;
+      showToast('Application deleted.', 'info');
+      fetchAppsList();
+      fetchPublicApps();
+      return;
+    } catch(err) {
+      showToast(err.message || 'Delete failed', 'error');
+    }
+  }
+
+  let local = getLocalApps().filter(a => a.id !== id);
+  saveLocalApps(local);
+  showToast('Application deleted from catalog.', 'info');
+  fetchAppsList();
+  fetchPublicApps();
+}
+
+// ==============================================================================
+// 6. STORAGE HELPERS & CONFIG MODAL
+// ==============================================================================
+function getLocalApps() {
+  const data = localStorage.getItem('ninestar_cached_apps');
+  if (data) {
+    try { return JSON.parse(data); } catch(e){}
+  }
+  return DEFAULT_APPS;
+}
+
+function saveLocalApps(apps) {
+  localStorage.setItem('ninestar_cached_apps', JSON.stringify(apps));
+}
+
+function toggleConfigPanel() {
+  const panel = document.getElementById('config-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function handleSaveConfig(e) {
+  e.preventDefault();
+  const supabaseUrl = document.getElementById('cfg-url').value.trim();
+  const supabaseAnonKey = document.getElementById('cfg-key').value.trim();
+
+  const config = { supabaseUrl, supabaseAnonKey };
+  localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(config));
+  showToast('Settings saved! Reconnecting...', 'success');
+  toggleConfigPanel();
+  initSupabase();
+  checkAdminAuthState();
+  fetchPublicApps();
+}
+
+function handleResetConfig() {
+  localStorage.removeItem(CONFIG_STORAGE_KEY);
+  showToast('Restored defaults', 'info');
+  initSupabase();
+  toggleConfigPanel();
+  checkAdminAuthState();
+}
+
+// Toast notification helper
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type}`;
+  t.style.display = 'block';
+  setTimeout(() => {
+    t.style.display = 'none';
+  }, 4000);
+}
+
+// HTML XSS escaping
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+</script>
+</body>
+</html>

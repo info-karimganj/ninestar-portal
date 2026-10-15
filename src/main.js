@@ -44,8 +44,23 @@ const DEFAULT_APPS = [
   }
 ];
 
+// Default site settings / general content
+const DEFAULT_SITE_SETTINGS = {
+  company_name: 'Nine Star Technologies',
+  email: 'support@yourdomain.com',
+  phone: '+000 0000 000000',
+  address: 'Bhatia Zahirkona, Niamatpur, Karimganj, Kishoreganj 2310, Dhaka Division, Bangladesh',
+  trade_license: 'No. 20262320000465, Dehunda Union Parishad, Karimganj, Kishoreganj',
+  hero_kicker: 'Software studio for Android, web and cloud',
+  hero_title: 'Crafting high-performance mobile and digital solutions',
+  hero_desc: 'At Nine Star Technologies, we design and engineer scalable Android applications, intuitive web platforms, and smart digital utilities for everyday users and modern businesses.',
+  about_title: 'About us',
+  about_desc: 'Nine Star Technologies is an independent technology and software development company focused on building reliable mobile applications and modern digital infrastructure. We specialize in cross-platform app architecture, native Android experiences, and secure cloud integrations, delivering tools that simplify productivity, finance, and daily life.'
+};
+
 let supabaseClient = supabase;
 let currentSession = null;
+let currentSettings = { ...DEFAULT_SITE_SETTINGS };
 let io = null;
 
 // ==============================================================================
@@ -113,7 +128,163 @@ export function reveal() {
 }
 
 // ==============================================================================
-// 2. PUBLIC APPS CATALOG (SUPABASE + REALTIME)
+// 2. DYNAMIC SITE SETTINGS / GENERAL CONTENT
+// ==============================================================================
+export async function fetchSiteSettings() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('site_settings')
+      .select('*')
+      .eq('key', 'general')
+      .maybeSingle();
+
+    if (!error && data && data.value) {
+      currentSettings = { ...DEFAULT_SITE_SETTINGS, ...data.value };
+      localStorage.setItem('ninestar_site_settings', JSON.stringify(currentSettings));
+    } else {
+      const cached = localStorage.getItem('ninestar_site_settings');
+      if (cached) currentSettings = { ...DEFAULT_SITE_SETTINGS, ...JSON.parse(cached) };
+    }
+  } catch (err) {
+    console.warn('Could not fetch site_settings from Supabase:', err);
+    const cached = localStorage.getItem('ninestar_site_settings');
+    if (cached) currentSettings = { ...DEFAULT_SITE_SETTINGS, ...JSON.parse(cached) };
+  }
+
+  applySiteSettingsToDOM(currentSettings);
+}
+
+function applySiteSettingsToDOM(s) {
+  if (!s) return;
+
+  // Hero
+  const kicker = document.getElementById('dyn-hero-kicker');
+  if (kicker && s.hero_kicker) kicker.textContent = s.hero_kicker;
+
+  const hTitle = document.getElementById('dyn-hero-title');
+  if (hTitle && s.hero_title) {
+    hTitle.innerHTML = escapeHtml(s.hero_title).replace(/(mobile and digital|high-performance|digital systems)/gi, '<span>$1</span>');
+  }
+
+  const hDesc = document.getElementById('dyn-hero-desc');
+  if (hDesc && s.hero_desc) hDesc.textContent = s.hero_desc;
+
+  // About
+  const aTitle = document.getElementById('dyn-about-title');
+  if (aTitle && s.about_title) aTitle.textContent = s.about_title;
+
+  const aDesc = document.getElementById('dyn-about-desc');
+  if (aDesc && s.about_desc) {
+    aDesc.innerHTML = `<strong>${escapeHtml(s.company_name || 'Nine Star Technologies')}</strong> ${escapeHtml(s.about_desc).replace(s.company_name, '')}`;
+  }
+
+  // Contact
+  const cCompany = document.getElementById('dyn-contact-company');
+  if (cCompany && s.company_name) cCompany.textContent = s.company_name;
+
+  const cEmail = document.getElementById('dyn-contact-email');
+  if (cEmail && s.email) {
+    cEmail.textContent = s.email;
+    cEmail.href = `mailto:${s.email}`;
+  }
+
+  const cBandBtn = document.getElementById('dyn-contact-band-btn');
+  if (cBandBtn && s.email) cBandBtn.href = `mailto:${s.email}`;
+
+  const cPhone = document.getElementById('dyn-contact-phone');
+  if (cPhone && s.phone) cPhone.textContent = s.phone;
+
+  const cAddress = document.getElementById('dyn-contact-address');
+  if (cAddress && s.address) cAddress.textContent = s.address;
+
+  const cLicense = document.getElementById('dyn-contact-license');
+  if (cLicense && s.trade_license) cLicense.textContent = s.trade_license;
+
+  // Populate form if open
+  populateSettingsForm(s);
+}
+
+function populateSettingsForm(s) {
+  const fCompany = document.getElementById('cfg-company-name');
+  if (fCompany) fCompany.value = s.company_name || '';
+
+  const fEmail = document.getElementById('cfg-email');
+  if (fEmail) fEmail.value = s.email || '';
+
+  const fPhone = document.getElementById('cfg-phone');
+  if (fPhone) fPhone.value = s.phone || '';
+
+  const fLicense = document.getElementById('cfg-trade-license');
+  if (fLicense) fLicense.value = s.trade_license || '';
+
+  const fAddress = document.getElementById('cfg-address');
+  if (fAddress) fAddress.value = s.address || '';
+
+  const fKicker = document.getElementById('cfg-hero-kicker');
+  if (fKicker) fKicker.value = s.hero_kicker || '';
+
+  const fTitle = document.getElementById('cfg-hero-title');
+  if (fTitle) fTitle.value = s.hero_title || '';
+
+  const fDesc = document.getElementById('cfg-hero-desc');
+  if (fDesc) fDesc.value = s.hero_desc || '';
+
+  const fAboutTitle = document.getElementById('cfg-about-title');
+  if (fAboutTitle) fAboutTitle.value = s.about_title || '';
+
+  const fAboutDesc = document.getElementById('cfg-about-desc');
+  if (fAboutDesc) fAboutDesc.value = s.about_desc || '';
+}
+
+export async function handleSaveSiteSettings(e) {
+  if (e) e.preventDefault();
+
+  const settings = {
+    company_name: document.getElementById('cfg-company-name').value.trim(),
+    email: document.getElementById('cfg-email').value.trim(),
+    phone: document.getElementById('cfg-phone').value.trim(),
+    trade_license: document.getElementById('cfg-trade-license').value.trim(),
+    address: document.getElementById('cfg-address').value.trim(),
+    hero_kicker: document.getElementById('cfg-hero-kicker').value.trim(),
+    hero_title: document.getElementById('cfg-hero-title').value.trim(),
+    hero_desc: document.getElementById('cfg-hero-desc').value.trim(),
+    about_title: document.getElementById('cfg-about-title').value.trim(),
+    about_desc: document.getElementById('cfg-about-desc').value.trim()
+  };
+
+  const btn = document.getElementById('btn-save-settings');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Saving to database...';
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from('site_settings')
+      .upsert({ key: 'general', value: settings }, { onConflict: 'key' });
+
+    if (error) throw error;
+
+    currentSettings = settings;
+    localStorage.setItem('ninestar_site_settings', JSON.stringify(settings));
+    applySiteSettingsToDOM(settings);
+    showToast('Website content and contact info updated live!', 'success');
+  } catch (err) {
+    console.warn('Error saving site_settings to remote Supabase, saved locally:', err);
+    currentSettings = settings;
+    localStorage.setItem('ninestar_site_settings', JSON.stringify(settings));
+    applySiteSettingsToDOM(settings);
+    showToast('Saved locally. (Run supabase_schema.sql in Supabase to sync remote table)', 'warning');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Save Website Changes';
+    }
+  }
+}
+
+// ==============================================================================
+// 3. PUBLIC APPS CATALOG (SUPABASE + REALTIME)
 // ==============================================================================
 export async function fetchPublicApps() {
   const grid = document.getElementById('apps-grid');
@@ -133,7 +304,7 @@ export async function fetchPublicApps() {
       return;
     }
   } catch (err) {
-    console.warn('Could not fetch from Supabase, using local defaults:', err);
+    console.warn('Could not fetch apps from Supabase, using local defaults:', err);
   }
 
   const local = getLocalApps().filter(a => a.status === 'published');
@@ -189,14 +360,17 @@ export function renderPublicApps(apps) {
 export function setupRealtimeSubscription() {
   try {
     supabaseClient
-      .channel('public:apps')
+      .channel('public:realtime_sync')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'apps' }, (payload) => {
-        console.log('Realtime update received:', payload);
         fetchPublicApps();
         if (window.location.hash === '#admin' && currentSession) {
           fetchAppsList();
         }
         showToast('App catalog synchronized with Supabase live', 'info');
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_settings' }, (payload) => {
+        fetchSiteSettings();
+        showToast('Website content updated live', 'info');
       })
       .subscribe();
   } catch (err) {
@@ -205,7 +379,7 @@ export function setupRealtimeSubscription() {
 }
 
 // ==============================================================================
-// 3. ADMIN AUTHENTICATION
+// 4. ADMIN AUTHENTICATION
 // ==============================================================================
 export async function checkAdminAuthState() {
   const loginView = document.getElementById('admin-login-view');
@@ -227,6 +401,7 @@ export async function checkAdminAuthState() {
     if (userEmailChip) userEmailChip.innerHTML = `Active Session: <strong>${escapeHtml(currentSession.user.email)}</strong>`;
     if (adminUserEmail) adminUserEmail.textContent = `Signed in as: ${currentSession.user.email}`;
     fetchAppsList();
+    populateSettingsForm(currentSettings);
   } else {
     if (loginView) loginView.style.display = 'block';
     if (dashView) dashView.style.display = 'none';
@@ -267,8 +442,30 @@ export async function handleLogout() {
   checkAdminAuthState();
 }
 
+// Tab switcher for Admin CMS
+export function switchTab(tab) {
+  const contentTab = document.getElementById('admin-tab-content');
+  const appsTab = document.getElementById('admin-tab-apps');
+  const btnContent = document.getElementById('tab-btn-content');
+  const btnApps = document.getElementById('tab-btn-apps');
+
+  if (tab === 'content') {
+    if (contentTab) contentTab.style.display = 'block';
+    if (appsTab) appsTab.style.display = 'none';
+    btnContent?.classList.add('active');
+    btnApps?.classList.remove('active');
+    populateSettingsForm(currentSettings);
+  } else {
+    if (contentTab) contentTab.style.display = 'none';
+    if (appsTab) appsTab.style.display = 'block';
+    btnContent?.classList.remove('active');
+    btnApps?.classList.add('active');
+    fetchAppsList();
+  }
+}
+
 // ==============================================================================
-// 4. ADMIN CRUD OPERATIONS
+// 5. ADMIN CRUD OPERATIONS FOR APPS
 // ==============================================================================
 export async function fetchAppsList() {
   const tbody = document.getElementById('admin-apps-tbody');
@@ -488,7 +685,10 @@ window.appActions = {
   deleteApp: deleteAppById,
   resetForm: resetAppForm,
   refreshList: fetchAppsList,
-  handleLogout: handleLogout
+  handleLogout: handleLogout,
+  switchTab: switchTab,
+  saveSiteSettings: handleSaveSiteSettings,
+  loadSiteSettings: () => populateSettingsForm(currentSettings)
 };
 
 // Lifecycle initialization
@@ -545,6 +745,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   handleRouting();
   reveal();
+  fetchSiteSettings();
   fetchPublicApps();
   setupRealtimeSubscription();
 });

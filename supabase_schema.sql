@@ -1,41 +1,55 @@
 -- ==============================================================================
--- Nine Star Technologies - Supabase Schema & Security Setup
+-- Nine Star Technologies - Supabase Schema & Real-Time Security Setup
 -- ==============================================================================
 
 -- 1. Create table for applications / products
 CREATE TABLE IF NOT EXISTS public.apps (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT NOT NULL,
-    category TEXT NOT NULL DEFAULT 'Mobile App',
+    category TEXT NOT NULL DEFAULT 'Mobile application',
     description TEXT NOT NULL,
     icon_text TEXT NOT NULL DEFAULT '★',
-    badge TEXT DEFAULT 'Active',
+    badge TEXT DEFAULT 'Mobile application',
     play_store_url TEXT,
-    privacy_policy_url TEXT,
-    terms_url TEXT,
+    privacy_policy_url TEXT DEFAULT '#privacy-policy',
+    terms_url TEXT DEFAULT '#terms-and-conditions',
     status TEXT NOT NULL DEFAULT 'published' CHECK (status IN ('published', 'draft', 'archived')),
     sort_order INT NOT NULL DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
+-- 2. Create table for editable Website Settings / Content (Hero, About, Contact, Services, Legal)
+CREATE TABLE IF NOT EXISTS public.site_settings (
+    key TEXT PRIMARY KEY,
+    value JSONB NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.apps ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
 
--- 2. Drop existing policies if re-running
+-- Drop existing policies if re-running
 DROP POLICY IF EXISTS "Public can view published apps" ON public.apps;
 DROP POLICY IF EXISTS "Authenticated users have full access to apps" ON public.apps;
+DROP POLICY IF EXISTS "Public can view site settings" ON public.site_settings;
+DROP POLICY IF EXISTS "Authenticated users can update site settings" ON public.site_settings;
 
 -- 3. Policy for Public Read Access:
--- Anyone (anonymous or verified) can view published apps in the public showcase
 CREATE POLICY "Public can view published apps"
     ON public.apps
     FOR SELECT
     TO anon, authenticated
     USING (status = 'published');
 
+CREATE POLICY "Public can view site settings"
+    ON public.site_settings
+    FOR SELECT
+    TO anon, authenticated
+    USING (true);
+
 -- 4. Policy for Authenticated Admin Access:
--- Only authenticated users (admins logged in via Supabase Auth) can SELECT, INSERT, UPDATE, DELETE all apps
 CREATE POLICY "Authenticated users have full access to apps"
     ON public.apps
     FOR ALL
@@ -43,7 +57,18 @@ CREATE POLICY "Authenticated users have full access to apps"
     USING (true)
     WITH CHECK (true);
 
--- 5. Trigger for updated_at timestamp
+CREATE POLICY "Authenticated users can update site settings"
+    ON public.site_settings
+    FOR ALL
+    TO authenticated
+    USING (true)
+    WITH CHECK (true);
+
+-- 5. Realtime publication
+ALTER PUBLICATION supabase_realtime ADD TABLE public.apps;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.site_settings;
+
+-- 6. Trigger for updated_at timestamp
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -58,43 +83,69 @@ CREATE TRIGGER trigger_apps_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION public.handle_updated_at();
 
--- 6. Insert initial seed data for Nine Star Technologies
+DROP TRIGGER IF EXISTS trigger_site_settings_updated_at ON public.site_settings;
+CREATE TRIGGER trigger_site_settings_updated_at
+    BEFORE UPDATE ON public.site_settings
+    FOR EACH ROW
+    EXECUTE FUNCTION public.handle_updated_at();
+
+-- 7. Insert initial seed data for Nine Star Technologies Apps
 INSERT INTO public.apps (title, category, description, icon_text, badge, play_store_url, privacy_policy_url, terms_url, status, sort_order)
 VALUES
 (
     'StarPulse Productivity',
-    'Productivity & Utility',
-    'Streamlined task & project orchestration designed for high-focus professionals with intelligent offline sync and encrypted cloud backups.',
-    '⚡',
+    'Mobile application',
+    'A minimalist task and habit orchestration suite designed for high-focus professionals with offline sync and encrypted cloud backups.',
+    '★',
     'Featured on Play Store',
     'https://play.google.com/store/apps/details?id=com.ninestar.starpulse',
-    '#privacy',
-    '#terms',
+    '#privacy-policy',
+    '#terms-and-conditions',
     'published',
     1
 ),
 (
     'Zenith Habit Tracker',
-    'Lifestyle & Wellness',
-    'Minimalist behavioral science tracker assisting users in building lasting habits with micro-journaling and ambient audio.',
+    'Mobile application',
+    'Behavioral science tracker assisting users in building lasting habits with micro-journaling and ambient audio.',
     '✦',
     'Popular',
     'https://play.google.com/store/apps/details?id=com.ninestar.zenith',
-    '#privacy',
-    '#terms',
+    '#privacy-policy',
+    '#terms-and-conditions',
     'published',
     2
 ),
 (
-    'Constellation Finance',
-    'Finance & Tools',
-    'Smart budget allocation and multi-currency expense ledger with biometrics, bank-grade encryption, and automated export.',
-    '◈',
-    'Latest Release',
-    'https://play.google.com/store/apps/details?id=com.ninestar.constellation',
-    '#privacy',
-    '#terms',
+    'Custom Enterprise Suite',
+    'Enterprise and client solutions',
+    'Tailored software, API development, and web platforms built around client workflows and modern digital infrastructure.',
+    'E',
+    'Enterprise & Client Solutions',
+    '',
+    '#privacy-policy',
+    '#terms-and-conditions',
     'published',
     3
 )
 ON CONFLICT DO NOTHING;
+
+-- 8. Insert initial seed content for All Website Sections
+INSERT INTO public.site_settings (key, value)
+VALUES
+(
+  'general',
+  '{
+    "company_name": "Nine Star Technologies",
+    "email": "support@yourdomain.com",
+    "phone": "+000 0000 000000",
+    "address": "Bhatia Zahirkona, Niamatpur, Karimganj, Kishoreganj 2310, Dhaka Division, Bangladesh",
+    "trade_license": "No. 20262320000465, Dehunda Union Parishad, Karimganj, Kishoreganj",
+    "hero_kicker": "Software studio for Android, web and cloud",
+    "hero_title": "Crafting high-performance mobile and digital solutions",
+    "hero_desc": "At Nine Star Technologies, we design and engineer scalable Android applications, intuitive web platforms, and smart digital utilities for everyday users and modern businesses.",
+    "about_title": "About us",
+    "about_desc": "Nine Star Technologies is an independent technology and software development company focused on building reliable mobile applications and modern digital infrastructure. We specialize in cross-platform app architecture, native Android experiences, and secure cloud integrations, delivering tools that simplify productivity, finance, and daily life."
+  }'::jsonb
+)
+ON CONFLICT (key) DO NOTHING;

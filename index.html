@@ -72,9 +72,9 @@
     <div class="wrap hero-grid">
       <div>
         <img src="/logo.png" alt="Nine Star Technologies" class="brand-img in d1" height="72">
-        <span class="kicker in d1">Software studio for Android, web and cloud</span>
-        <h1 class="in d2">Crafting high-performance <span>mobile and digital</span> solutions</h1>
-        <p class="in d3">At Nine Star Technologies, we design and engineer scalable Android applications, intuitive web platforms, and smart digital utilities for everyday users and modern businesses.</p>
+        <span class="kicker in d1" id="dyn-hero-kicker">Software studio for Android, web and cloud</span>
+        <h1 class="in d2" id="dyn-hero-title">Crafting high-performance <span>mobile and digital</span> solutions</h1>
+        <p class="in d3" id="dyn-hero-desc">At Nine Star Technologies, we design and engineer scalable Android applications, intuitive web platforms, and smart digital utilities for everyday users and modern businesses.</p>
         <div class="cta in d4">
           <a class="btn" href="#products">View our apps</a>
           <a class="btn ghost" href="#contact">Contact support</a>
@@ -110,8 +110,8 @@
 
   <!-- About Section -->
   <section id="about" class="alt"><div class="wrap about">
-    <div class="rv"><div class="rule"></div><h2>About us</h2>
-      <p><strong>Nine Star Technologies</strong> is an independent technology and software development company focused on building reliable mobile applications and modern digital infrastructure. We specialize in cross-platform app architecture, native Android experiences, and secure cloud integrations, delivering tools that simplify productivity, finance, and daily life.</p>
+    <div class="rv"><div class="rule"></div><h2 id="dyn-about-title">About us</h2>
+      <p id="dyn-about-desc"><strong>Nine Star Technologies</strong> is an independent technology and software development company focused on building reliable mobile applications and modern digital infrastructure. We specialize in cross-platform app architecture, native Android experiences, and secure cloud integrations, delivering tools that simplify productivity, finance, and daily life.</p>
     </div>
     <div class="facts rv">
       <div class="fact"><strong>Cross-platform architecture</strong><span>One codebase, consistent quality on every device.</span></div>
@@ -185,16 +185,16 @@
     <div class="band rv" style="margin-bottom:56px">
       <h2>Have an app or product in mind?</h2>
       <p class="lead">Tell us what you want to build. We reply within 24–48 hours.</p>
-      <a class="btn" href="mailto:support@yourdomain.com">Email us</a>
+      <a class="btn" id="dyn-contact-band-btn" href="mailto:support@yourdomain.com">Email us</a>
     </div>
     <div class="sec-head rv"><div class="rule"></div><h2>Contact and office</h2></div>
     <div class="card rv" style="max-width:700px">
       <dl>
-        <dt>Company</dt><dd><strong>Nine Star Technologies</strong></dd>
-        <dt>Email</dt><dd><a href="mailto:support@yourdomain.com" style="color:var(--gold)">support@yourdomain.com</a></dd>
-        <dt>Phone</dt><dd>+000 0000 000000</dd>
-        <dt>Address</dt><dd>Bhatia Zahirkona, Niamatpur, Karimganj, Kishoreganj 2310, Dhaka Division, Bangladesh</dd>
-        <dt>Trade license</dt><dd>No. 20262320000465, Dehunda Union Parishad, Karimganj, Kishoreganj</dd>
+        <dt>Company</dt><dd><strong id="dyn-contact-company">Nine Star Technologies</strong></dd>
+        <dt>Email</dt><dd><a id="dyn-contact-email" href="mailto:support@yourdomain.com" style="color:var(--gold)">support@yourdomain.com</a></dd>
+        <dt>Phone</dt><dd id="dyn-contact-phone">+000 0000 000000</dd>
+        <dt>Address</dt><dd id="dyn-contact-address">Bhatia Zahirkona, Niamatpur, Karimganj, Kishoreganj 2310, Dhaka Division, Bangladesh</dd>
+        <dt>Trade license</dt><dd id="dyn-contact-license">No. 20262320000465, Dehunda Union Parishad, Karimganj, Kishoreganj</dd>
       </dl>
       <p class="note">We aim to respond to all user inquiries within 24–48 hours.</p>
     </div>
@@ -260,19 +260,93 @@
 
   <!-- Admin Dashboard View -->
   <div id="admin-dashboard-view" style="display:none">
-    <div class="admin-card">
-      <div class="admin-header">
+    
+    <!-- Management Header & Tabs -->
+    <div class="admin-card" style="margin-bottom:20px">
+      <div class="admin-header" style="margin-bottom:16px;padding-bottom:14px">
         <div>
           <span class="badge" style="border-color:var(--gold);margin-bottom:6px">Active Admin Session</span>
-          <h2 style="margin:0;font-size:30px">Catalog Manager</h2>
+          <h2 style="margin:0;font-size:30px">Administrative CMS Control Center</h2>
           <p style="margin:4px 0 0;color:var(--muted)" id="admin-user-email">Signed in</p>
         </div>
         <button class="btn small danger" onclick="window.appActions.handleLogout()">Sign Out</button>
       </div>
 
-      <!-- Add / Edit Form -->
-      <h3 style="font-family:var(--serif);font-size:21px;margin:0 0 16px" id="form-app-heading">Add New Application</h3>
-      <form id="form-app">
+      <!-- Navigation Tabs -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="tab-btn active" id="tab-btn-content" onclick="window.appActions.switchTab('content')">
+          📝 Website Content & Contact Info
+        </button>
+        <button class="tab-btn" id="tab-btn-apps" onclick="window.appActions.switchTab('apps')">
+          📱 Manage Applications Catalog
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 1: WEBSITE CONTENT & CONTACT MANAGER -->
+    <div id="admin-tab-content">
+      <div class="admin-card">
+        <h3 style="font-family:var(--serif);font-size:22px;margin:0 0 6px">General Content & Corporate Contact Details</h3>
+        <p style="margin:0 0 20px;font-size:14px;color:var(--muted)">Change company info, office address, phone, email, trade license, hero text, and about us section in real-time without touching code.</p>
+
+        <form id="form-site-settings" onsubmit="window.appActions.saveSiteSettings(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="cfg-company-name">Company Legal Name *</label>
+              <input type="text" id="cfg-company-name" placeholder="Nine Star Technologies" required>
+            </div>
+            <div class="form-group">
+              <label for="cfg-email">Official Support & Verification Email *</label>
+              <input type="email" id="cfg-email" placeholder="support@yourdomain.com" required>
+            </div>
+            <div class="form-group">
+              <label for="cfg-phone">Phone / WhatsApp Number</label>
+              <input type="text" id="cfg-phone" placeholder="+000 0000 000000">
+            </div>
+            <div class="form-group">
+              <label for="cfg-trade-license">Trade License Information</label>
+              <input type="text" id="cfg-trade-license" placeholder="No. 20262320000465, Dehunda Union Parishad...">
+            </div>
+            <div class="form-group full">
+              <label for="cfg-address">Registered Office Address *</label>
+              <input type="text" id="cfg-address" placeholder="Bhatia Zahirkona, Niamatpur, Karimganj, Kishoreganj 2310..." required>
+            </div>
+            <div class="form-group">
+              <label for="cfg-hero-kicker">Hero Kicker Badge</label>
+              <input type="text" id="cfg-hero-kicker" placeholder="Software studio for Android, web and cloud">
+            </div>
+            <div class="form-group full">
+              <label for="cfg-hero-title">Hero Main Heading *</label>
+              <input type="text" id="cfg-hero-title" placeholder="Crafting high-performance mobile and digital solutions" required>
+            </div>
+            <div class="form-group full">
+              <label for="cfg-hero-desc">Hero Description Paragraph *</label>
+              <textarea id="cfg-hero-desc" placeholder="At Nine Star Technologies, we design and engineer..." required></textarea>
+            </div>
+            <div class="form-group full">
+              <label for="cfg-about-title">About Section Title</label>
+              <input type="text" id="cfg-about-title" placeholder="About us">
+            </div>
+            <div class="form-group full">
+              <label for="cfg-about-desc">About Us Description *</label>
+              <textarea id="cfg-about-desc" placeholder="Nine Star Technologies is an independent technology..." required></textarea>
+            </div>
+          </div>
+
+          <div style="margin-top:14px;display:flex;gap:10px">
+            <button type="submit" class="btn" id="btn-save-settings">Save Website Changes</button>
+            <button type="button" class="btn ghost" onclick="window.appActions.loadSiteSettings()">Reset to Saved</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 2: APPLICATIONS CATALOG MANAGER -->
+    <div id="admin-tab-apps" style="display:none">
+      <div class="admin-card">
+        <!-- Add / Edit Form -->
+        <h3 style="font-family:var(--serif);font-size:21px;margin:0 0 16px" id="form-app-heading">Add New Application</h3>
+        <form id="form-app">
         <input type="hidden" id="app-id" value="">
         <div class="form-grid">
           <div class="form-group">
@@ -358,6 +432,7 @@
         </table>
       </div>
     </div>
+  </div>
   </div>
 </div>
 

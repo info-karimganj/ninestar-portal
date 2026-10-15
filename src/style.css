@@ -916,30 +916,64 @@ body.policy .page.active {
   filter: drop-shadow(0 10px 26px var(--glow));
 }
 
-.logo img.brand-img, .hero img.brand-img, .fcols img.brand-img {
-  display: block;
-  object-fit: contain;
-  filter: drop-shadow(0 8px 24px var(--glow));
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
 }
 
 .logo img.brand-img {
-  height: 44px;
+  height: 52px;
   width: auto;
-  max-width: 200px;
+  max-width: 220px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 14px var(--glow));
+  transition: transform 0.3s ease;
+}
+
+.logo:hover img.brand-img {
+  transform: scale(1.03);
 }
 
 .hero img.brand-img {
-  height: 72px;
+  height: 90px;
   width: auto;
-  max-width: 320px;
-  margin: 0 0 20px -4px;
+  max-width: 380px;
+  object-fit: contain;
+  margin: 0 0 24px -6px;
+  filter: drop-shadow(0 12px 30px var(--glow));
 }
 
 .fcols img.brand-img {
-  height: 48px;
+  height: 56px;
   width: auto;
-  max-width: 220px;
-  margin: 0 0 14px -2px;
+  max-width: 240px;
+  object-fit: contain;
+  margin: 0 0 16px -2px;
+  filter: drop-shadow(0 6px 18px var(--glow));
+}
+
+.tab-btn {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: all 0.25s;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--gold2), var(--gold));
+  color: var(--on-gold);
+  border-color: transparent;
 }
 
 .wm {

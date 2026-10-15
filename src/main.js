@@ -189,7 +189,10 @@ function applySiteSettingsToDOM(s) {
   }
 
   const cBandBtn = document.getElementById('dyn-contact-band-btn');
-  if (cBandBtn && s.email) cBandBtn.href = `mailto:${s.email}`;
+  if (cBandBtn && s.email) {
+    const subj = encodeURIComponent('Project Inquiry - ' + (s.company_name || 'Nine Star Technologies'));
+    cBandBtn.href = `mailto:${s.email}?subject=${subj}`;
+  }
 
   const cPhone = document.getElementById('dyn-contact-phone');
   if (cPhone && s.phone) cPhone.textContent = s.phone;
@@ -691,6 +694,30 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+export function handleEmailCTA(e) {
+  const btn = document.getElementById('dyn-contact-band-btn');
+  const targetEmail = currentSettings.email || 'support@ninestartech.com';
+  const mailSubject = encodeURIComponent('Project Inquiry - ' + (currentSettings.company_name || 'Nine Star Technologies'));
+  const mailtoUri = `mailto:${targetEmail}?subject=${mailSubject}`;
+
+  if (btn) btn.href = mailtoUri;
+
+  // Hybrid fallback: copy email to clipboard
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(targetEmail).then(() => {
+      showToast(`Copied ${targetEmail} to clipboard! Opening mail client...`, 'info');
+    }).catch(() => {
+      showToast(`Opening mail client for ${targetEmail}...`, 'info');
+    });
+  } else {
+    showToast(`Opening mail client for ${targetEmail}...`, 'info');
+  }
+
+  // Allow native mailto navigation
+  window.location.href = mailtoUri;
+  if (e) e.preventDefault();
+}
+
 // Global actions for inline event compatibility
 window.appActions = {
   editApp: editAppById,
@@ -701,7 +728,8 @@ window.appActions = {
   handleLogout: handleLogout,
   switchTab: switchTab,
   saveSiteSettings: handleSaveSiteSettings,
-  loadSiteSettings: () => populateSettingsForm(currentSettings)
+  loadSiteSettings: () => populateSettingsForm(currentSettings),
+  handleEmailCTA: handleEmailCTA
 };
 
 // Lifecycle initialization

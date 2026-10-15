@@ -635,9 +635,9 @@ h2 {
 }
 
 .card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-8px);
   border-color: var(--gold);
-  box-shadow: 0 26px 54px -30px var(--gold);
+  box-shadow: 0 28px 60px -20px rgba(201, 162, 75, 0.35), 0 12px 28px -10px var(--gold);
 }
 
 .card:hover::before {
@@ -680,9 +680,27 @@ h2 {
   color: var(--on-gold);
   background: linear-gradient(135deg, var(--gold2), var(--gold));
   margin-bottom: 20px;
-  transition: transform 0.5s;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
   overflow: hidden;
   position: relative;
+}
+
+.icon::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 65%
+  );
+  transform: rotate(-30deg) translateY(-100%);
+  transition: transform 0.75s ease;
+  pointer-events: none;
 }
 
 .icon.has-img {
@@ -697,10 +715,20 @@ h2 {
   object-fit: cover;
   border-radius: 16px;
   display: block;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card:hover .icon {
-  transform: rotate(-8deg) scale(1.07);
+  transform: rotate(-8deg) scale(1.08);
+  box-shadow: 0 8px 24px -4px var(--glow);
+}
+
+.card:hover .icon::after {
+  transform: rotate(-30deg) translateY(100%);
+}
+
+.card:hover .app-icon-img {
+  transform: scale(1.06);
 }
 
 .app-preview-card {
@@ -752,18 +780,37 @@ h2 {
 }
 
 .fact {
+  position: relative;
   padding: 20px 24px;
-  border-left: 2px solid var(--gold);
   background: var(--surface);
   border-radius: 0 16px 16px 0;
-  transition: transform 0.3s;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease;
   border-top: 1px solid var(--line);
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
+  border-left: 3px solid var(--gold);
+  overflow: hidden;
+}
+
+.fact::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -3px;
+  width: 3px;
+  height: 0%;
+  background: linear-gradient(180deg, var(--gold2), var(--gold));
+  transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rv.on .fact::before {
+  height: 100%;
 }
 
 .fact:hover {
-  transform: translateX(6px);
+  transform: translateX(8px);
+  border-color: var(--gold);
+  box-shadow: 0 12px 30px -10px var(--glow);
 }
 
 .fact strong {
@@ -845,6 +892,7 @@ h2 {
   border: 1px solid var(--line);
   position: relative;
   overflow: hidden;
+  transition: border-color 0.6s ease, box-shadow 0.6s ease;
 }
 
 .band::before {
@@ -857,6 +905,44 @@ h2 {
   margin-left: -210px;
   background: var(--glow);
   filter: blur(60px);
+}
+
+.band::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 28px;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    transparent 20%,
+    var(--gold2) 50%,
+    transparent 80%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.band.on::after {
+  opacity: 1;
+  animation: borderShimmer 4s ease-in-out infinite alternate;
+}
+
+.band.on {
+  box-shadow: 0 20px 60px -20px var(--glow);
+}
+
+.contact-card {
+  position: relative;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+
+.contact-card.on {
+  box-shadow: 0 20px 60px -15px var(--glow);
 }
 
 .band > * {
@@ -933,21 +1019,91 @@ footer {
   padding-top: 22px;
 }
 
+/* ==============================================================================
+   HIGH-PERFORMANCE STAGGERED SCROLL REVEALS & GPU-ACCELERATED TRANSITIONS
+   ============================================================================== */
 .js .rv {
   opacity: 0;
-  transform: translateY(26px);
-  transition: opacity 0.9s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transform: translateY(28px);
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
 }
 
 .js .rv.on {
   opacity: 1;
-  transform: none;
+  transform: translateY(0);
 }
 
-/* Subpage & Admin CMS Styling */
+/* Stagger Utilities for Child Elements */
+.rv-stagger > * {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.rv-stagger.on > *:nth-child(1) { transition-delay: 0.05s; }
+.rv-stagger.on > *:nth-child(2) { transition-delay: 0.16s; }
+.rv-stagger.on > *:nth-child(3) { transition-delay: 0.28s; }
+.rv-stagger.on > *:nth-child(4) { transition-delay: 0.40s; }
+.rv-stagger.on > *:nth-child(5) { transition-delay: 0.52s; }
+.rv-stagger.on > *:nth-child(6) { transition-delay: 0.64s; }
+
+.rv-stagger.on > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Products Cards: Zoom-and-Rise Staggered Effect */
+.grid .card.rv {
+  opacity: 0;
+  transform: translateY(32px) scale(0.96);
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s ease,
+              border-color 0.35s ease;
+}
+
+.grid .card.rv.on {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Services Bento: Alternating slight tilt transition */
+.bento .card.rv:nth-child(odd).on {
+  animation: cardSlightFloat 8s ease-in-out infinite alternate;
+}
+
+/* Subpage & Admin CMS Styling - Cinematic Route Transitions */
 .page {
   display: none;
   padding: 72px 0;
+}
+
+body.policy .home {
+  display: none;
+}
+
+body.policy .page.active {
+  display: block;
+  animation: pageEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+body:not(.policy) .home {
+  animation: pageFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Staggered Cascade for Subpage Headings & Cards */
+.page.active h1 {
+  animation: subpageSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+}
+
+.page.active .legal-doc-card {
+  animation: subpageSlideUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+.page.active .legal-section {
+  animation: subpageSlideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both;
 }
 
 .page h1 {
@@ -1316,6 +1472,62 @@ tr:hover td {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes subpageSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes borderShimmer {
+  0% {
+    background-position: 0% 0%;
+    box-shadow: 0 20px 60px -20px var(--glow);
+  }
+  50% {
+    box-shadow: 0 24px 70px -15px rgba(201, 162, 75, 0.35);
+  }
+  100% {
+    background-position: 200% 200%;
+    box-shadow: 0 20px 60px -20px var(--glow);
+  }
+}
+
+@keyframes cardSlightFloat {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-4px) rotate(0.4deg);
+  }
+}
+
 @media (max-width: 820px) {
   .hero-grid, .about {
     grid-template-columns: 1fr;
@@ -1366,8 +1578,8 @@ tr:hover td {
     animation: none !important;
     transition: none !important;
   }
-  .in, .js .rv {
-    opacity: 1;
-    transform: none;
+  .in, .js .rv, .rv-stagger > *, .grid .card.rv, .page.active, .page.active * {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

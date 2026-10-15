@@ -107,13 +107,17 @@ export function handleRouting() {
   const isPolicy = hash === 'privacy-policy' || hash === 'terms-and-conditions' || hash === 'admin';
   document.body.classList.toggle('policy', isPolicy);
 
-  // Toggle pages
+  // Toggle pages with transition reset
   document.querySelectorAll('.page').forEach(x => {
-    if (hash === 'admin' && x.id === 'page-admin') {
+    const isTarget = (hash === 'admin' && x.id === 'page-admin') || (x.id === hash);
+    if (isTarget) {
+      x.classList.remove('active');
+      // Trigger browser reflow for clean CSS animation replay
+      void x.offsetWidth;
       x.classList.add('active');
-      checkAdminAuthState();
+      if (hash === 'admin') checkAdminAuthState();
     } else {
-      x.classList.toggle('active', x.id === hash);
+      x.classList.remove('active');
     }
   });
 
@@ -124,6 +128,9 @@ export function handleRouting() {
     if (el) {
       setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 50);
     }
+  } else {
+    // Returning to home view: refresh reveal states
+    setTimeout(() => reveal(), 80);
   }
 }
 
@@ -143,23 +150,41 @@ function count(el) {
   f();
 }
 
-// Intersection Observer Reveal
+// High-Performance IntersectionObserver with Staggered Scroll Reveals
 export function reveal() {
-  const els = document.querySelectorAll('.rv:not(.on)');
+  const els = document.querySelectorAll('.rv:not(.on), .rv-stagger:not(.on)');
   if (!('IntersectionObserver' in window)) {
     els.forEach(e => e.classList.add('on'));
     document.querySelectorAll('[data-n]').forEach(e => { e.textContent = e.dataset.n; });
     return;
   }
+
+  if (io) {
+    io.disconnect();
+  }
+
   io = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('on');
-        entry.target.querySelectorAll('[data-n]').forEach(count);
-        io.unobserve(entry.target);
+        const target = entry.target;
+        target.classList.add('on');
+
+        // Check if container has direct staggered children
+        const staggerChildren = target.querySelectorAll(':scope > .card, :scope > .step, :scope > .fact');
+        if (staggerChildren.length > 0) {
+          staggerChildren.forEach((child, index) => {
+            child.style.transitionDelay = `${index * 110}ms`;
+            child.classList.add('on');
+          });
+        }
+
+        // Trigger any embedded number counters
+        target.querySelectorAll('[data-n]').forEach(count);
+        io.unobserve(target);
       }
     });
-  }, { threshold: 0.12 });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
   els.forEach(e => io.observe(e));
 }
 
@@ -531,14 +556,14 @@ export function renderPublicApps(apps) {
     return;
   }
 
-  grid.innerHTML = apps.map(app => {
+  grid.innerHTML = apps.map((app, idx) => {
     const hasImg = app.icon_url && (app.icon_url.startsWith('http://') || app.icon_url.startsWith('https://'));
     const iconHtml = hasImg 
       ? `<div class="icon has-img"><img src="${escapeHtml(app.icon_url)}" alt="${escapeHtml(app.title)}" class="app-icon-img" loading="lazy" onerror="this.parentElement.classList.remove('has-img');this.parentElement.textContent='${escapeHtml(app.icon_text || '★')}'"></div>`
       : `<div class="icon">${escapeHtml(app.icon_text || '★')}</div>`;
 
     return `
-    <article class="card rv on" id="app-${escapeHtml(app.id)}">
+    <article class="card rv on" id="app-${escapeHtml(app.id)}" style="animation-delay:${idx * 0.12}s">
       ${iconHtml}
       ${app.badge ? `<span class="badge">${escapeHtml(app.badge)}</span>` : ''}
       <h3>${escapeHtml(app.title)}</h3>
@@ -567,6 +592,9 @@ export function renderPublicApps(apps) {
       c.style.setProperty('--y', (e.clientY - r.top) + 'px');
     });
   });
+
+  // Re-observe any unrevealed elements
+  reveal();
 }
 
 export function setupRealtimeSubscription() {

@@ -531,9 +531,15 @@ export function renderPublicApps(apps) {
     return;
   }
 
-  grid.innerHTML = apps.map(app => `
+  grid.innerHTML = apps.map(app => {
+    const hasImg = app.icon_url && (app.icon_url.startsWith('http://') || app.icon_url.startsWith('https://'));
+    const iconHtml = hasImg 
+      ? `<div class="icon has-img"><img src="${escapeHtml(app.icon_url)}" alt="${escapeHtml(app.title)}" class="app-icon-img" loading="lazy" onerror="this.parentElement.classList.remove('has-img');this.parentElement.textContent='${escapeHtml(app.icon_text || '★')}'"></div>`
+      : `<div class="icon">${escapeHtml(app.icon_text || '★')}</div>`;
+
+    return `
     <article class="card rv on" id="app-${escapeHtml(app.id)}">
-      <div class="icon">${escapeHtml(app.icon_text || '★')}</div>
+      ${iconHtml}
       ${app.badge ? `<span class="badge">${escapeHtml(app.badge)}</span>` : ''}
       <h3>${escapeHtml(app.title)}</h3>
       <p>${escapeHtml(app.description)}</p>
@@ -550,7 +556,8 @@ export function renderPublicApps(apps) {
         ` : ''}
       </div>
     </article>
-  `).join('');
+    `;
+  }).join('');
 
   // Attach card spotlight hover listener
   grid.querySelectorAll('.card').forEach(c => {
@@ -714,9 +721,15 @@ export async function fetchAppsList() {
     return;
   }
 
-  tbody.innerHTML = apps.map(app => `
+  tbody.innerHTML = apps.map(app => {
+    const hasImg = app.icon_url && (app.icon_url.startsWith('http://') || app.icon_url.startsWith('https://'));
+    const iconCell = hasImg
+      ? `<img src="${escapeHtml(app.icon_url)}" alt="${escapeHtml(app.title)}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;vertical-align:middle">`
+      : `<span style="font-size:22px">${escapeHtml(app.icon_text || '★')}</span>`;
+
+    return `
     <tr>
-      <td style="font-size:22px;text-align:center">${escapeHtml(app.icon_text || '★')}</td>
+      <td style="text-align:center">${iconCell}</td>
       <td>
         <strong style="color:var(--ink);font-size:15px">${escapeHtml(app.title)}</strong>
         <div style="font-size:12.5px;color:var(--muted)">${escapeHtml(app.category || 'Mobile application')}</div>
@@ -742,7 +755,8 @@ export async function fetchAppsList() {
         </div>
       </td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 }
 
 export async function handleSaveApp(e) {
@@ -751,6 +765,7 @@ export async function handleSaveApp(e) {
   const title = document.getElementById('app-title').value.trim();
   const category = document.getElementById('app-category').value.trim();
   const icon_text = document.getElementById('app-icon').value.trim() || '★';
+  const icon_url = document.getElementById('app-icon-url').value.trim() || null;
   const badge = document.getElementById('app-badge').value.trim();
   const status = document.getElementById('app-status').value;
   const sort_order = parseInt(document.getElementById('app-sort').value, 10) || 0;
@@ -763,6 +778,7 @@ export async function handleSaveApp(e) {
     title,
     category,
     icon_text,
+    icon_url,
     badge,
     status,
     sort_order,
@@ -817,6 +833,7 @@ export async function editAppById(id) {
   document.getElementById('app-title').value = app.title || '';
   document.getElementById('app-category').value = app.category || '';
   document.getElementById('app-icon').value = app.icon_text || '★';
+  document.getElementById('app-icon-url').value = app.icon_url || '';
   document.getElementById('app-badge').value = app.badge || '';
   document.getElementById('app-status').value = app.status || 'published';
   document.getElementById('app-sort').value = app.sort_order ?? 0;
@@ -824,6 +841,21 @@ export async function editAppById(id) {
   document.getElementById('app-play-url').value = app.play_store_url || '';
   document.getElementById('app-privacy-url').value = app.privacy_policy_url || '#privacy-policy';
   document.getElementById('app-terms-url').value = app.terms_url || '#terms-and-conditions';
+
+  // Update preview card if app has icon_url
+  const prevWrap = document.getElementById('play-preview-wrap');
+  const prevImg = document.getElementById('play-preview-img');
+  const prevTitle = document.getElementById('play-preview-title');
+  const prevPkg = document.getElementById('play-preview-pkg');
+
+  if (app.icon_url) {
+    if (prevWrap) prevWrap.style.display = 'block';
+    if (prevImg) prevImg.src = app.icon_url;
+    if (prevTitle) prevTitle.textContent = app.title;
+    if (prevPkg) prevPkg.textContent = app.play_store_url || 'Saved App Icon';
+  } else {
+    if (prevWrap) prevWrap.style.display = 'none';
+  }
 
   document.getElementById('form-app-heading').textContent = `Editing: ${app.title}`;
   document.getElementById('btn-save-app').textContent = 'Update Application';
@@ -835,6 +867,7 @@ export async function editAppById(id) {
 export function resetAppForm() {
   document.getElementById('form-app').reset();
   document.getElementById('app-id').value = '';
+  document.getElementById('app-icon-url').value = '';
   document.getElementById('app-privacy-url').value = '#privacy-policy';
   document.getElementById('app-terms-url').value = '#terms-and-conditions';
   document.getElementById('app-icon').value = '★';
@@ -842,6 +875,12 @@ export function resetAppForm() {
   document.getElementById('form-app-heading').textContent = 'Add New Application';
   document.getElementById('btn-save-app').textContent = 'Save Application';
   document.getElementById('btn-cancel-edit').style.display = 'none';
+
+  const prevWrap = document.getElementById('play-preview-wrap');
+  if (prevWrap) prevWrap.style.display = 'none';
+
+  const statusEl = document.getElementById('play-scrape-status');
+  if (statusEl) statusEl.textContent = '';
 }
 
 export async function toggleAppStatus(id, currentStatus) {
@@ -934,6 +973,122 @@ export function handleEmailCTA(e) {
   if (e) e.preventDefault();
 }
 
+// ==============================================================================
+// 5. GOOGLE PLAY STORE AUTO-SCRAPER & METADATA EXTRACTOR
+// ==============================================================================
+export function extractPackageId(url) {
+  if (!url) return null;
+  const str = String(url).trim();
+  try {
+    const parsedUrl = new URL(str);
+    const idParam = parsedUrl.searchParams.get('id');
+    if (idParam) return idParam;
+  } catch (e) {
+    // URL constructor failed, fallback to regex
+  }
+  const match = str.match(/(?:[?&]id=|details\?id=)([a-zA-Z0-9._]+)/i);
+  return match ? match[1] : null;
+}
+
+export async function fetchPlayStoreMetadata(packageId) {
+  const playStoreUrl = `https://play.google.com/store/apps/details?id=${packageId}&hl=en`;
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(playStoreUrl)}`;
+
+  const response = await fetch(proxyUrl);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const data = await response.json();
+
+  if (!data.contents) throw new Error('Could not fetch app page');
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(data.contents, 'text/html');
+
+  // Extract Open Graph & Twitter Card tags
+  const title = doc.querySelector('meta[property="og:title"]')?.getAttribute('content')
+             || doc.querySelector('meta[name="twitter:title"]')?.getAttribute('content')
+             || doc.querySelector('h1')?.textContent
+             || '';
+
+  // Extract high-resolution official app logo
+  const iconUrl = doc.querySelector('meta[property="og:image"]')?.getAttribute('content')
+               || doc.querySelector('meta[name="twitter:image"]')?.getAttribute('content')
+               || doc.querySelector('img[alt*="Cover art"], img[alt*="icon"]')?.getAttribute('src')
+               || '';
+
+  // Extract description snippet
+  const description = doc.querySelector('meta[property="og:description"]')?.getAttribute('content')
+                   || doc.querySelector('meta[name="description"]')?.getAttribute('content')
+                   || '';
+
+  return {
+    title: title.replace(/\s*-\s*Apps on Google Play$/i, '').trim(),
+    iconUrl: iconUrl ? iconUrl.replace(/=s\d+.*$/, '=s512') : '', // Request high-res icon if Google thumbnail format
+    description: description.slice(0, 220).trim()
+  };
+}
+
+let scrapeTimeout = null;
+
+export async function handlePlayUrlInput(url) {
+  clearTimeout(scrapeTimeout);
+  const statusEl = document.getElementById('play-scrape-status');
+  const prevWrap = document.getElementById('play-preview-wrap');
+  const prevImg = document.getElementById('play-preview-img');
+  const prevTitle = document.getElementById('play-preview-title');
+  const prevPkg = document.getElementById('play-preview-pkg');
+
+  const packageId = extractPackageId(url);
+
+  if (!packageId) {
+    if (statusEl) statusEl.textContent = '';
+    return;
+  }
+
+  if (statusEl) {
+    statusEl.innerHTML = `<span style="color:var(--gold)">⏳ Fetching app metadata from Google Play...</span>`;
+  }
+
+  scrapeTimeout = setTimeout(async () => {
+    try {
+      const meta = await fetchPlayStoreMetadata(packageId);
+
+      if (meta.title && !document.getElementById('app-title').value.trim()) {
+        document.getElementById('app-title').value = meta.title;
+      }
+
+      if (meta.description && !document.getElementById('app-desc').value.trim()) {
+        document.getElementById('app-desc').value = meta.description;
+      }
+
+      if (meta.iconUrl) {
+        document.getElementById('app-icon-url').value = meta.iconUrl;
+        if (prevWrap) prevWrap.style.display = 'block';
+        if (prevImg) prevImg.src = meta.iconUrl;
+        if (prevTitle) prevTitle.textContent = meta.title || 'Official App Icon';
+        if (prevPkg) prevPkg.textContent = `Package: ${packageId}`;
+      }
+
+      if (statusEl) {
+        statusEl.innerHTML = `<span style="color:var(--success)">✓ Successfully auto-filled from Play Store!</span>`;
+      }
+      showToast(`Auto-fetched details for ${meta.title || packageId}`, 'success');
+    } catch (err) {
+      console.warn('Play store scraping notice:', err);
+      if (statusEl) {
+        statusEl.innerHTML = `<span style="color:var(--muted)">Could not auto-fetch. Please fill fields manually.</span>`;
+      }
+    }
+  }, 450);
+}
+
+export function clearScrapedIcon() {
+  const iconInput = document.getElementById('app-icon-url');
+  if (iconInput) iconInput.value = '';
+  const prevWrap = document.getElementById('play-preview-wrap');
+  if (prevWrap) prevWrap.style.display = 'none';
+  showToast('Scraped icon removed. Form will use fallback symbol.', 'info');
+}
+
 // Global actions for inline event compatibility
 window.appActions = {
   editApp: editAppById,
@@ -947,7 +1102,9 @@ window.appActions = {
   loadSiteSettings: () => populateSettingsForm(currentSettings),
   saveSocialLinks: handleSaveSocialLinks,
   loadSocialLinks: () => populateSocialForm(currentSocialLinks),
-  handleEmailCTA: handleEmailCTA
+  handleEmailCTA: handleEmailCTA,
+  handlePlayUrlInput: handlePlayUrlInput,
+  clearScrapedIcon: clearScrapedIcon
 };
 
 // Lifecycle initialization

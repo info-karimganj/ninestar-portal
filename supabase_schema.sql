@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS public.apps (
     category TEXT NOT NULL DEFAULT 'Mobile application',
     description TEXT NOT NULL,
     icon_text TEXT NOT NULL DEFAULT '★',
+    icon_url TEXT,
     badge TEXT DEFAULT 'Mobile application',
     play_store_url TEXT,
     privacy_policy_url TEXT DEFAULT '#privacy-policy',
@@ -18,6 +19,9 @@ CREATE TABLE IF NOT EXISTS public.apps (
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+
+-- Ensure icon_url exists if table was previously created
+ALTER TABLE public.apps ADD COLUMN IF NOT EXISTS icon_url TEXT;
 
 -- 2. Create table for editable Website Settings / Content (Hero, About, Contact, Services, Legal)
 CREATE TABLE IF NOT EXISTS public.site_settings (

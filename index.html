@@ -554,7 +554,29 @@
         <h3 style="font-family:var(--serif);font-size:21px;margin:0 0 16px" id="form-app-heading">Add New Application</h3>
         <form id="form-app">
         <input type="hidden" id="app-id" value="">
-        <div class="form-grid">
+          <div class="form-group full" style="border:1px solid rgba(212,175,55,0.3);background:rgba(212,175,55,0.04);border-radius:14px;padding:16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <label for="app-play-url" style="margin:0;font-weight:600">⚡ Google Play Store URL (Auto-Scraper)</label>
+              <span id="play-scrape-status" style="font-size:12.5px;color:var(--muted)"></span>
+            </div>
+            <input type="url" id="app-play-url" placeholder="https://play.google.com/store/apps/details?id=com.example.app" style="width:100%" oninput="window.appActions.handlePlayUrlInput(this.value)">
+            <p style="margin:4px 0 0;font-size:12px;color:var(--muted)">Paste any Google Play link to automatically fetch the official app icon, title, and description.</p>
+
+            <!-- Live Scraping Preview Card -->
+            <div id="play-preview-wrap" style="display:none;margin-top:12px">
+              <div class="app-preview-card">
+                <img id="play-preview-img" src="" alt="App Icon">
+                <div style="overflow:hidden">
+                  <div style="font-weight:600;font-size:14px;color:var(--ink)" id="play-preview-title">App Title</div>
+                  <div style="font-size:12px;color:var(--muted);white-space:nowrap;text-overflow:ellipsis;overflow:hidden" id="play-preview-pkg">Package ID</div>
+                </div>
+                <button type="button" class="btn small secondary" style="margin-left:auto" onclick="window.appActions.clearScrapedIcon()">Remove Icon</button>
+              </div>
+            </div>
+          </div>
+
+          <input type="hidden" id="app-icon-url" value="">
+
           <div class="form-group">
             <label for="app-title">Application Title *</label>
             <input type="text" id="app-title" placeholder="e.g. StarPulse Scanner" required>
@@ -564,7 +586,7 @@
             <input type="text" id="app-category" placeholder="e.g. Mobile application" required>
           </div>
           <div class="form-group">
-            <label for="app-icon">Icon Symbol / Initial</label>
+            <label for="app-icon">Fallback Emoji / Initial</label>
             <input type="text" id="app-icon" placeholder="e.g. ✦, A, 📱, ★" value="✦" maxlength="4">
           </div>
           <div class="form-group">
@@ -586,10 +608,6 @@
           <div class="form-group full">
             <label for="app-desc">Description *</label>
             <textarea id="app-desc" placeholder="Comprehensive application summary showcasing key features..." required></textarea>
-          </div>
-          <div class="form-group">
-            <label for="app-play-url">Google Play Store URL</label>
-            <input type="url" id="app-play-url" placeholder="https://play.google.com/store/apps/details?id=...">
           </div>
           <div class="form-group">
             <label for="app-privacy-url">Privacy Policy URL</label>

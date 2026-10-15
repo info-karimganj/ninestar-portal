@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException, BackgroundTasks, status
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 import requests
 
 app = FastAPI(
@@ -26,11 +26,11 @@ app.add_middleware(
 )
 
 # -----------------------------------------------------------------------------
-# Pydantic Request Model
+# Pydantic Request Model (Using str to avoid external email_validator dependency)
 # -----------------------------------------------------------------------------
 class ContactLeadRequest(BaseModel):
     name: str = Field(..., min_length=2, max_length=120)
-    email: EmailStr
+    email: str = Field(..., min_length=5, max_length=150)
     phone: Optional[str] = Field(None, max_length=40)
     service_type: Optional[str] = Field(None, max_length=100)
     message: str = Field(..., min_length=5, max_length=3000)

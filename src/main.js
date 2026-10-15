@@ -58,9 +58,45 @@ const DEFAULT_SITE_SETTINGS = {
   about_desc: 'Nine Star Technologies is an independent technology and software development company focused on building reliable mobile applications and modern digital infrastructure. We specialize in cross-platform app architecture, native Android experiences, and secure cloud integrations, delivering tools that simplify productivity, finance, and daily life.'
 };
 
+// Preset Social Media Platforms & Default state
+const DEFAULT_SOCIAL_LINKS = {
+  linkedin: '',
+  facebook: '',
+  twitter_x: '',
+  whatsapp: '',
+  telegram: '',
+  instagram: '',
+  youtube: '',
+  github: ''
+};
+
+// Pure, lightweight inline SVG icon registry
+const SOCIAL_ICONS = {
+  linkedin: `<svg viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>`,
+  facebook: `<svg viewBox="0 0 24 24"><path d="M12 2.04c-5.5 0-10 4.49-10 10.02 0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02z"/></svg>`,
+  twitter_x: `<svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
+  whatsapp: `<svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.53c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.79.98-.14.17-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1s.9 2.44 1.03 2.61c.12.17 1.77 2.7 4.29 3.79.6.26 1.07.41 1.43.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.07-.1-.23-.17-.48-.29z"/></svg>`,
+  telegram: `<svg viewBox="0 0 24 24"><path d="m20.665 3.717-17.73 6.837c-1.21.486-1.203 1.162-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l-.313 4.671c.458 0 .66-.21.916-.458l2.2-2.14 4.577 3.382c.844.464 1.452.225 1.662-.785l3-14.135c.308-1.236-.473-1.8-1.282-1.438z"/></svg>`,
+  instagram: `<svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>`,
+  youtube: `<svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
+  github: `<svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg>`
+};
+
+const SOCIAL_LABELS = {
+  linkedin: 'LinkedIn',
+  facebook: 'Facebook',
+  twitter_x: 'X (Twitter)',
+  whatsapp: 'WhatsApp',
+  telegram: 'Telegram',
+  instagram: 'Instagram',
+  youtube: 'YouTube',
+  github: 'GitHub'
+};
+
 let supabaseClient = supabase;
 let currentSession = null;
 let currentSettings = { ...DEFAULT_SITE_SETTINGS };
+let currentSocialLinks = { ...DEFAULT_SOCIAL_LINKS };
 let io = null;
 
 // ==============================================================================
@@ -308,6 +344,151 @@ export async function handleSaveSiteSettings(e) {
 }
 
 // ==============================================================================
+// 2.5 DYNAMIC SOCIAL MEDIA HUB (SUPABASE + REALTIME)
+// ==============================================================================
+export async function fetchSocialLinks() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('social_links')
+      .select('*')
+      .eq('is_active', true);
+
+    if (!error && data && data.length > 0) {
+      const map = { ...DEFAULT_SOCIAL_LINKS };
+      data.forEach(item => {
+        if (item.platform && item.url) {
+          map[item.platform] = item.url;
+        }
+      });
+      currentSocialLinks = map;
+      localStorage.setItem('ninestar_social_links', JSON.stringify(map));
+    } else {
+      const cached = localStorage.getItem('ninestar_social_links');
+      if (cached) currentSocialLinks = { ...DEFAULT_SOCIAL_LINKS, ...JSON.parse(cached) };
+    }
+  } catch (err) {
+    console.warn('Could not fetch social_links from Supabase:', err);
+    const cached = localStorage.getItem('ninestar_social_links');
+    if (cached) currentSocialLinks = { ...DEFAULT_SOCIAL_LINKS, ...JSON.parse(cached) };
+  }
+
+  renderSocialBars(currentSocialLinks);
+}
+
+// Helper to format WhatsApp and Telegram links safely
+function sanitizeSocialUrl(platform, rawVal) {
+  if (!rawVal) return '';
+  const val = String(rawVal).trim();
+  if (!val) return '';
+
+  if (platform === 'whatsapp') {
+    if (val.startsWith('http://') || val.startsWith('https://')) return val;
+    const cleanNumber = val.replace(/[^0-9]/g, '');
+    return cleanNumber ? `https://wa.me/${cleanNumber}` : '';
+  }
+
+  if (platform === 'telegram') {
+    if (val.startsWith('http://') || val.startsWith('https://')) return val;
+    const cleanUser = val.replace(/^@/, '').trim();
+    return cleanUser ? `https://t.me/${cleanUser}` : '';
+  }
+
+  if (!val.startsWith('http://') && !val.startsWith('https://')) {
+    return `https://${val}`;
+  }
+
+  return val;
+}
+
+export function renderSocialBars(links) {
+  const contactBar = document.getElementById('contact-social-bar');
+  const footerBar = document.getElementById('footer-social-bar');
+
+  const platforms = Object.keys(DEFAULT_SOCIAL_LINKS);
+  const activeItems = platforms
+    .map(p => ({
+      platform: p,
+      label: SOCIAL_LABELS[p] || p,
+      url: sanitizeSocialUrl(p, links[p]),
+      svg: SOCIAL_ICONS[p] || ''
+    }))
+    .filter(item => Boolean(item.url));
+
+  const html = activeItems.length > 0 ? activeItems.map(item => `
+    <a href="${escapeHtml(item.url)}" 
+       target="_blank" 
+       rel="noopener noreferrer" 
+       class="social-btn" 
+       title="${escapeHtml(item.label)}" 
+       aria-label="${escapeHtml(item.label)}">
+      ${item.svg}
+    </a>
+  `).join('') : '<span style="color:var(--muted);font-size:13.5px">Connect with us on our upcoming social channels.</span>';
+
+  if (contactBar) contactBar.innerHTML = html;
+  if (footerBar) footerBar.innerHTML = activeItems.length > 0 ? html : '';
+}
+
+export function populateSocialForm(links) {
+  Object.keys(DEFAULT_SOCIAL_LINKS).forEach(p => {
+    const input = document.getElementById(`soc-${p}`);
+    if (input) {
+      input.value = links[p] || '';
+    }
+  });
+}
+
+export async function handleSaveSocialLinks(e) {
+  if (e) e.preventDefault();
+
+  const newLinks = {};
+  const upsertRows = [];
+
+  Object.keys(DEFAULT_SOCIAL_LINKS).forEach(p => {
+    const input = document.getElementById(`soc-${p}`);
+    const val = input ? input.value.trim() : '';
+    newLinks[p] = val;
+    upsertRows.push({
+      id: p,
+      platform: p,
+      url: val,
+      is_active: Boolean(val),
+      updated_at: new Date().toISOString()
+    });
+  });
+
+  const btn = document.getElementById('btn-save-social');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Saving to database...';
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from('social_links')
+      .upsert(upsertRows, { onConflict: 'id' });
+
+    if (error) throw error;
+
+    currentSocialLinks = newLinks;
+    localStorage.setItem('ninestar_social_links', JSON.stringify(newLinks));
+    renderSocialBars(newLinks);
+    showToast('Social links updated successfully!', 'success');
+  } catch (err) {
+    console.warn('Error saving social_links to remote Supabase, saved locally:', err);
+    currentSocialLinks = newLinks;
+    localStorage.setItem('ninestar_social_links', JSON.stringify(newLinks));
+    renderSocialBars(newLinks);
+    showToast('Saved locally. (Run supabase_schema.sql in Supabase to sync remote table)', 'warning');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Save Social Links';
+    }
+  }
+}
+
+// ==============================================================================
 // 3. PUBLIC APPS CATALOG (SUPABASE + REALTIME)
 // ==============================================================================
 export async function fetchPublicApps() {
@@ -396,6 +577,10 @@ export function setupRealtimeSubscription() {
         fetchSiteSettings();
         showToast('Website content updated live', 'info');
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'social_links' }, (payload) => {
+        fetchSocialLinks();
+        showToast('Social media links updated live', 'info');
+      })
       .subscribe();
   } catch (err) {
     console.warn('Realtime subscription error:', err);
@@ -426,6 +611,7 @@ export async function checkAdminAuthState() {
     if (adminUserEmail) adminUserEmail.textContent = `Signed in as: ${currentSession.user.email}`;
     fetchAppsList();
     populateSettingsForm(currentSettings);
+    populateSocialForm(currentSocialLinks);
   } else {
     if (loginView) loginView.style.display = 'block';
     if (dashView) dashView.style.display = 'none';
@@ -469,20 +655,32 @@ export async function handleLogout() {
 // Tab switcher for Admin CMS
 export function switchTab(tab) {
   const contentTab = document.getElementById('admin-tab-content');
+  const socialTab = document.getElementById('admin-tab-social');
   const appsTab = document.getElementById('admin-tab-apps');
+
   const btnContent = document.getElementById('tab-btn-content');
+  const btnSocial = document.getElementById('tab-btn-social');
   const btnApps = document.getElementById('tab-btn-apps');
+
+  // Reset all tabs
+  if (contentTab) contentTab.style.display = 'none';
+  if (socialTab) socialTab.style.display = 'none';
+  if (appsTab) appsTab.style.display = 'none';
+
+  btnContent?.classList.remove('active');
+  btnSocial?.classList.remove('active');
+  btnApps?.classList.remove('active');
 
   if (tab === 'content') {
     if (contentTab) contentTab.style.display = 'block';
-    if (appsTab) appsTab.style.display = 'none';
     btnContent?.classList.add('active');
-    btnApps?.classList.remove('active');
     populateSettingsForm(currentSettings);
+  } else if (tab === 'social') {
+    if (socialTab) socialTab.style.display = 'block';
+    btnSocial?.classList.add('active');
+    populateSocialForm(currentSocialLinks);
   } else {
-    if (contentTab) contentTab.style.display = 'none';
     if (appsTab) appsTab.style.display = 'block';
-    btnContent?.classList.remove('active');
     btnApps?.classList.add('active');
     fetchAppsList();
   }
@@ -747,6 +945,8 @@ window.appActions = {
   switchTab: switchTab,
   saveSiteSettings: handleSaveSiteSettings,
   loadSiteSettings: () => populateSettingsForm(currentSettings),
+  saveSocialLinks: handleSaveSocialLinks,
+  loadSocialLinks: () => populateSocialForm(currentSocialLinks),
   handleEmailCTA: handleEmailCTA
 };
 
@@ -805,6 +1005,7 @@ window.addEventListener('DOMContentLoaded', () => {
   handleRouting();
   reveal();
   fetchSiteSettings();
+  fetchSocialLinks();
   fetchPublicApps();
   setupRealtimeSubscription();
 });

@@ -149,3 +149,60 @@ VALUES
   }'::jsonb
 )
 ON CONFLICT (key) DO NOTHING;
+
+-- ==============================================================================
+-- 9. Create table for Social Media Profiles (Dynamic Admin Hub)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.social_links (
+    id TEXT PRIMARY KEY, -- platform key e.g. 'linkedin', 'facebook', 'twitter_x'
+    platform TEXT NOT NULL UNIQUE,
+    url TEXT NOT NULL DEFAULT '',
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+-- Enable RLS
+ALTER TABLE public.social_links ENABLE ROW LEVEL SECURITY;
+
+-- Drop old policies if re-running
+DROP POLICY IF EXISTS "Public can view active social links" ON public.social_links;
+DROP POLICY IF EXISTS "Authenticated users have full access to social links" ON public.social_links;
+
+-- Public can read all active social links
+CREATE POLICY "Public can view active social links"
+    ON public.social_links
+    FOR SELECT
+    TO anon, authenticated
+    USING (is_active = true);
+
+-- Authenticated admins have full CRUD access
+CREATE POLICY "Authenticated users have full access to social links"
+    ON public.social_links
+    FOR ALL
+    TO authenticated
+    USING (true)
+    WITH CHECK (true);
+
+-- Realtime publication for social_links
+ALTER PUBLICATION supabase_realtime ADD TABLE public.social_links;
+
+-- Trigger for updated_at
+DROP TRIGGER IF EXISTS trigger_social_links_updated_at ON public.social_links;
+CREATE TRIGGER trigger_social_links_updated_at
+    BEFORE UPDATE ON public.social_links
+    FOR EACH ROW
+    EXECUTE FUNCTION public.handle_updated_at();
+
+-- Seed initial platforms for Nine Star Technologies
+INSERT INTO public.social_links (id, platform, url, is_active)
+VALUES
+('linkedin', 'linkedin', '', true),
+('facebook', 'facebook', '', true),
+('twitter_x', 'twitter_x', '', true),
+('whatsapp', 'whatsapp', '', true),
+('telegram', 'telegram', '', true),
+('instagram', 'instagram', '', true),
+('youtube', 'youtube', '', true),
+('github', 'github', '', true)
+ON CONFLICT (id) DO NOTHING;
+

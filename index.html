@@ -200,7 +200,16 @@
         <dt>Address</dt><dd id="dyn-contact-address">Bhatia Zahirkona, Niamatpur, Karimganj, Kishoreganj 2310, Dhaka Division, Bangladesh</dd>
         <dt>Trade license</dt><dd id="dyn-contact-license">No. 20262320000465, Dehunda Union Parishad, Karimganj, Kishoreganj</dd>
       </dl>
-      <p class="note">We aim to respond to all user inquiries within 24–48 hours.</p>
+
+      <!-- Dynamic Social Media Profiles -->
+      <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:20px">
+        <h4 style="font-size:14px;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);margin:0 0 14px">Connect with Nine Star Technologies</h4>
+        <div class="social-bar" id="contact-social-bar">
+          <!-- Dynamic Social Icons Rendered from Supabase -->
+        </div>
+      </div>
+
+      <p class="note" style="margin-top:20px">We aim to respond to all user inquiries within 24–48 hours.</p>
     </div>
   </div></section>
 </main>
@@ -421,6 +430,9 @@
         <button class="tab-btn active" id="tab-btn-content" onclick="window.appActions.switchTab('content')">
           📝 Website Content & Contact Info
         </button>
+        <button class="tab-btn" id="tab-btn-social" onclick="window.appActions.switchTab('social')">
+          🌐 Social Media Profiles
+        </button>
         <button class="tab-btn" id="tab-btn-apps" onclick="window.appActions.switchTab('apps')">
           📱 Manage Applications Catalog
         </button>
@@ -485,7 +497,57 @@
       </div>
     </div>
 
-    <!-- TAB 2: APPLICATIONS CATALOG MANAGER -->
+    <!-- TAB 2: SOCIAL MEDIA PROFILES MANAGER -->
+    <div id="admin-tab-social" style="display:none">
+      <div class="admin-card">
+        <h3 style="font-family:var(--serif);font-size:22px;margin:0 0 6px">Manage Social Media Profiles & Channels</h3>
+        <p style="margin:0 0 20px;font-size:14px;color:var(--muted)">Connect your official social media and messaging channels. Links will automatically appear as sleek icons in your footer and contact card. Leave any platform empty to hide its icon.</p>
+
+        <form id="form-social-links" onsubmit="window.appActions.saveSocialLinks(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="soc-linkedin">LinkedIn Company / Profile URL</label>
+              <input type="url" id="soc-linkedin" placeholder="https://linkedin.com/company/ninestartech">
+            </div>
+            <div class="form-group">
+              <label for="soc-facebook">Facebook Page URL</label>
+              <input type="url" id="soc-facebook" placeholder="https://facebook.com/ninestartech">
+            </div>
+            <div class="form-group">
+              <label for="soc-twitter_x">X (Formerly Twitter) URL</label>
+              <input type="url" id="soc-twitter_x" placeholder="https://x.com/ninestartech">
+            </div>
+            <div class="form-group">
+              <label for="soc-whatsapp">WhatsApp (Phone number or wa.me link)</label>
+              <input type="text" id="soc-whatsapp" placeholder="+8801860686940 or https://wa.me/8801860686940">
+            </div>
+            <div class="form-group">
+              <label for="soc-telegram">Telegram (Username or t.me link)</label>
+              <input type="text" id="soc-telegram" placeholder="@ninestartech or https://t.me/ninestartech">
+            </div>
+            <div class="form-group">
+              <label for="soc-instagram">Instagram Profile URL</label>
+              <input type="url" id="soc-instagram" placeholder="https://instagram.com/ninestartech">
+            </div>
+            <div class="form-group">
+              <label for="soc-youtube">YouTube Channel URL</label>
+              <input type="url" id="soc-youtube" placeholder="https://youtube.com/@ninestartech">
+            </div>
+            <div class="form-group">
+              <label for="soc-github">GitHub Organization / Profile URL</label>
+              <input type="url" id="soc-github" placeholder="https://github.com/info-karimganj">
+            </div>
+          </div>
+
+          <div style="margin-top:18px;display:flex;gap:10px">
+            <button type="submit" class="btn" id="btn-save-social">Save Social Links</button>
+            <button type="button" class="btn ghost" onclick="window.appActions.loadSocialLinks()">Reset to Saved</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 3: APPLICATIONS CATALOG MANAGER -->
     <div id="admin-tab-apps" style="display:none">
       <div class="admin-card">
         <!-- Add / Edit Form -->
@@ -586,6 +648,9 @@
     <div>
       <img src="/logo.png" alt="Nine Star Technologies Logo" class="brand-img" height="48">
       <span>Reliable mobile applications and modern digital infrastructure.</span>
+      <div class="social-bar footer-social" id="footer-social-bar" style="margin-top:16px">
+        <!-- Dynamic Social Icons Rendered from Supabase -->
+      </div>
     </div>
     <div>
       <h4>Explore</h4>

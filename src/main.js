@@ -1,46 +1,44 @@
 import './style.css';
 import { supabase } from './supabase.js';
 
-// Configuration keys & defaults
-const CONFIG_STORAGE_KEY = 'ninestar_supabase_config';
-
+// Default seed apps in case remote database is syncing
 const DEFAULT_APPS = [
   {
     id: 'seed-1',
     title: 'StarPulse Productivity',
-    category: 'Productivity & Utility',
-    description: 'Streamlined task & project orchestration designed for high-focus professionals with intelligent offline sync and encrypted cloud backups.',
-    icon_text: '⚡',
-    badge: 'Featured on Play Store',
+    category: 'Mobile application',
+    description: 'A minimalist task and habit orchestration suite designed for high-focus professionals with offline sync and cloud backup.',
+    icon_text: '★',
+    badge: 'Mobile application',
     play_store_url: 'https://play.google.com/store/apps/details?id=com.ninestar.starpulse',
-    privacy_policy_url: '#privacy',
-    terms_url: '#terms',
+    privacy_policy_url: '#privacy-policy',
+    terms_url: '#terms-and-conditions',
     status: 'published',
     sort_order: 1
   },
   {
     id: 'seed-2',
     title: 'Zenith Habit Tracker',
-    category: 'Lifestyle & Wellness',
-    description: 'Minimalist behavioral science tracker assisting users in building lasting habits with micro-journaling and ambient audio.',
+    category: 'Mobile application',
+    description: 'Behavioral science tracker assisting users in building lasting habits with micro-journaling and ambient audio.',
     icon_text: '✦',
-    badge: 'Popular',
+    badge: 'Mobile application',
     play_store_url: 'https://play.google.com/store/apps/details?id=com.ninestar.zenith',
-    privacy_policy_url: '#privacy',
-    terms_url: '#terms',
+    privacy_policy_url: '#privacy-policy',
+    terms_url: '#terms-and-conditions',
     status: 'published',
     sort_order: 2
   },
   {
     id: 'seed-3',
-    title: 'Constellation Finance',
-    category: 'Finance & Tools',
-    description: 'Smart budget allocation and multi-currency expense ledger with biometrics, bank-grade encryption, and automated export.',
-    icon_text: '◈',
-    badge: 'Latest Release',
-    play_store_url: 'https://play.google.com/store/apps/details?id=com.ninestar.constellation',
-    privacy_policy_url: '#privacy',
-    terms_url: '#terms',
+    title: 'Custom Enterprise Suite',
+    category: 'Enterprise and client solutions',
+    description: 'Tailored software, API development, and web platforms built around client workflows and modern digital infrastructure.',
+    icon_text: 'E',
+    badge: 'Enterprise & Client Solutions',
+    play_store_url: '',
+    privacy_policy_url: '#privacy-policy',
+    terms_url: '#terms-and-conditions',
     status: 'published',
     sort_order: 3
   }
@@ -48,44 +46,79 @@ const DEFAULT_APPS = [
 
 let supabaseClient = supabase;
 let currentSession = null;
-let cachedApps = [];
+let io = null;
 
 // ==============================================================================
-// 1. ROUTING SYSTEM (SPA HASH ROUTING)
+// 1. ROUTING & UI INTERACTIONS
 // ==============================================================================
 export function handleRouting() {
-  const hash = window.location.hash.toLowerCase();
-  const pages = ['privacy', 'terms', 'admin'];
-  const body = document.body;
+  const hash = window.location.hash.slice(1);
+  const isPolicy = hash === 'privacy-policy' || hash === 'terms-and-conditions' || hash === 'admin';
+  document.body.classList.toggle('policy', isPolicy);
 
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-
-  if (pages.some(p => hash.startsWith('#' + p))) {
-    body.classList.add('subpage');
-    if (hash.startsWith('#privacy')) {
-      document.getElementById('page-privacy')?.classList.add('active');
-    } else if (hash.startsWith('#terms')) {
-      document.getElementById('page-terms')?.classList.add('active');
-    } else if (hash.startsWith('#admin')) {
-      document.getElementById('page-admin')?.classList.add('active');
+  // Toggle pages
+  document.querySelectorAll('.page').forEach(x => {
+    if (hash === 'admin' && x.id === 'page-admin') {
+      x.classList.add('active');
       checkAdminAuthState();
+    } else {
+      x.classList.toggle('active', x.id === hash);
     }
+  });
+
+  if (isPolicy) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  } else {
-    body.classList.remove('subpage');
-    if (hash && hash !== '#') {
-      const target = document.querySelector(hash);
-      if (target) {
-        setTimeout(() => target.scrollIntoView({ behavior: 'smooth' }), 50);
-      }
+  } else if (hash && hash !== 'top') {
+    const el = document.getElementById(hash);
+    if (el) {
+      setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 50);
     }
   }
 }
 
+// Interactive Number Counter
+function count(el) {
+  const n = +el.dataset.n;
+  let t = 0;
+  const f = () => {
+    t += Math.max(1, n / 40);
+    if (t >= n) {
+      el.textContent = n;
+      return;
+    }
+    el.textContent = Math.floor(t);
+    requestAnimationFrame(f);
+  };
+  f();
+}
+
+// Intersection Observer Reveal
+export function reveal() {
+  const els = document.querySelectorAll('.rv:not(.on)');
+  if (!('IntersectionObserver' in window)) {
+    els.forEach(e => e.classList.add('on'));
+    document.querySelectorAll('[data-n]').forEach(e => { e.textContent = e.dataset.n; });
+    return;
+  }
+  io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('on');
+        entry.target.querySelectorAll('[data-n]').forEach(count);
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  els.forEach(e => io.observe(e));
+}
+
 // ==============================================================================
-// 2. PUBLIC APPS SHOWCASE & REALTIME
+// 2. PUBLIC APPS CATALOG (SUPABASE + REALTIME)
 // ==============================================================================
 export async function fetchPublicApps() {
+  const grid = document.getElementById('apps-grid');
+  if (!grid) return;
+
   try {
     const { data, error } = await supabaseClient
       .from('apps')
@@ -96,17 +129,15 @@ export async function fetchPublicApps() {
 
     if (error) throw error;
     if (data && data.length > 0) {
-      cachedApps = data;
       renderPublicApps(data);
       return;
     }
   } catch (err) {
-    console.warn('Could not fetch from remote Supabase, falling back to local dataset:', err);
+    console.warn('Could not fetch from Supabase, using local defaults:', err);
   }
 
-  const localApps = getLocalApps().filter(a => a.status === 'published');
-  cachedApps = localApps;
-  renderPublicApps(localApps);
+  const local = getLocalApps().filter(a => a.status === 'published');
+  renderPublicApps(local);
 }
 
 export function renderPublicApps(apps) {
@@ -115,36 +146,44 @@ export function renderPublicApps(apps) {
 
   if (!apps || apps.length === 0) {
     grid.innerHTML = `
-      <div class="card" style="grid-column:1/-1;text-align:center;padding:48px 24px">
-        <div class="icon" style="margin:0 auto 16px">✦</div>
+      <article class="card rv on" style="grid-column:1/-1;text-align:center;padding:48px 24px">
+        <div class="icon" style="margin:0 auto 16px">★</div>
         <h3>Software Catalog Updating</h3>
         <p>Our engineering team is currently deploying our latest Google Play builds. Please check back shortly.</p>
-      </div>
+      </article>
     `;
     return;
   }
 
   grid.innerHTML = apps.map(app => `
-    <div class="card" id="app-${escapeHtml(app.id)}">
+    <article class="card rv on" id="app-${escapeHtml(app.id)}">
+      <div class="icon">${escapeHtml(app.icon_text || '★')}</div>
       ${app.badge ? `<span class="badge">${escapeHtml(app.badge)}</span>` : ''}
-      <div class="icon">${escapeHtml(app.icon_text || '✦')}</div>
       <h3>${escapeHtml(app.title)}</h3>
-      <div style="font-size:13px;color:var(--gold);margin-top:-4px;margin-bottom:12px;font-weight:600">${escapeHtml(app.category || 'Mobile Application')}</div>
       <p>${escapeHtml(app.description)}</p>
       <div class="card-links">
         ${app.play_store_url ? `
-          <a href="${escapeHtml(app.play_store_url)}" target="_blank" rel="noopener" class="btn small" style="text-decoration:none">
-            Google Play ↗
+          <a href="${escapeHtml(app.play_store_url)}" target="_blank" rel="noopener" class="btn small">
+            Get it on Google Play ↗
           </a>
         ` : `
-          <span class="btn small ghost" style="opacity:.6;cursor:default">Internal Release</span>
+          <a class="btn ghost small" href="#contact" data-home>Learn more</a>
         `}
         ${app.privacy_policy_url ? `
-          <a href="${escapeHtml(app.privacy_policy_url)}" class="btn small ghost">Privacy Policy</a>
+          <a href="${escapeHtml(app.privacy_policy_url)}" class="btn ghost small">Privacy policy</a>
         ` : ''}
       </div>
-    </div>
+    </article>
   `).join('');
+
+  // Attach card spotlight hover listener
+  grid.querySelectorAll('.card').forEach(c => {
+    c.addEventListener('pointermove', function(e) {
+      const r = c.getBoundingClientRect();
+      c.style.setProperty('--x', (e.clientX - r.left) + 'px');
+      c.style.setProperty('--y', (e.clientY - r.top) + 'px');
+    });
+  });
 }
 
 export function setupRealtimeSubscription() {
@@ -154,10 +193,10 @@ export function setupRealtimeSubscription() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'apps' }, (payload) => {
         console.log('Realtime update received:', payload);
         fetchPublicApps();
-        if (window.location.hash.startsWith('#admin') && currentSession) {
+        if (window.location.hash === '#admin' && currentSession) {
           fetchAppsList();
         }
-        showToast('App catalog synchronized in real-time', 'info');
+        showToast('App catalog synchronized with Supabase live', 'info');
       })
       .subscribe();
   } catch (err) {
@@ -185,7 +224,7 @@ export async function checkAdminAuthState() {
   if (currentSession && currentSession.user) {
     if (loginView) loginView.style.display = 'none';
     if (dashView) dashView.style.display = 'block';
-    if (userEmailChip) userEmailChip.innerHTML = `Logged in: <strong>${escapeHtml(currentSession.user.email)}</strong>`;
+    if (userEmailChip) userEmailChip.innerHTML = `Active Session: <strong>${escapeHtml(currentSession.user.email)}</strong>`;
     if (adminUserEmail) adminUserEmail.textContent = `Signed in as: ${currentSession.user.email}`;
     fetchAppsList();
   } else {
@@ -208,11 +247,10 @@ export async function handleLogin(e) {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) throw error;
     currentSession = data.session;
-    showToast('Authentication successful!', 'success');
+    showToast('Signed in to Supabase CMS', 'success');
     checkAdminAuthState();
   } catch(err) {
-    // If user hasn't created the user in Supabase auth yet, provide clear instruction
-    showToast(err.message || 'Login failed. Please check your credentials.', 'error');
+    showToast(err.message || 'Authentication error. Please check credentials.', 'error');
   } finally {
     btn.disabled = false;
     btn.textContent = 'Sign In to CMS';
@@ -225,7 +263,7 @@ export async function handleLogout() {
   } catch(e){}
   sessionStorage.removeItem('ninestar_admin_auth');
   currentSession = null;
-  showToast('Logged out of admin session.', 'info');
+  showToast('Signed out of admin session.', 'info');
   checkAdminAuthState();
 }
 
@@ -248,7 +286,7 @@ export async function fetchAppsList() {
     if (error) throw error;
     apps = data || [];
   } catch(err) {
-    console.warn('Supabase fetch failed:', err);
+    console.warn('Supabase fetch error:', err);
     apps = getLocalApps();
   }
 
@@ -259,10 +297,10 @@ export async function fetchAppsList() {
 
   tbody.innerHTML = apps.map(app => `
     <tr>
-      <td style="font-size:22px;text-align:center">${escapeHtml(app.icon_text || '✦')}</td>
+      <td style="font-size:22px;text-align:center">${escapeHtml(app.icon_text || '★')}</td>
       <td>
         <strong style="color:var(--ink);font-size:15px">${escapeHtml(app.title)}</strong>
-        <div style="font-size:12.5px;color:var(--muted)">${escapeHtml(app.category || 'General')}</div>
+        <div style="font-size:12.5px;color:var(--muted)">${escapeHtml(app.category || 'Mobile application')}</div>
         ${app.badge ? `<span style="font-size:11px;color:var(--gold);font-weight:600">[${escapeHtml(app.badge)}]</span>` : ''}
       </td>
       <td>
@@ -271,7 +309,7 @@ export async function fetchAppsList() {
       <td>
         <div style="font-size:13px;display:flex;flex-direction:column;gap:3px">
           ${app.play_store_url ? `<a href="${escapeHtml(app.play_store_url)}" target="_blank" style="color:var(--gold)">Play Store ↗</a>` : '<span style="color:var(--muted)">No Store URL</span>'}
-          <span style="color:var(--muted);font-size:11px">${escapeHtml(app.privacy_policy_url || '#privacy')}</span>
+          <span style="color:var(--muted);font-size:11px">${escapeHtml(app.privacy_policy_url || '#privacy-policy')}</span>
         </div>
       </td>
       <td>${app.sort_order ?? 0}</td>
@@ -293,14 +331,14 @@ export async function handleSaveApp(e) {
   const id = document.getElementById('app-id').value;
   const title = document.getElementById('app-title').value.trim();
   const category = document.getElementById('app-category').value.trim();
-  const icon_text = document.getElementById('app-icon').value.trim() || '✦';
+  const icon_text = document.getElementById('app-icon').value.trim() || '★';
   const badge = document.getElementById('app-badge').value.trim();
   const status = document.getElementById('app-status').value;
   const sort_order = parseInt(document.getElementById('app-sort').value, 10) || 0;
   const description = document.getElementById('app-desc').value.trim();
   const play_store_url = document.getElementById('app-play-url').value.trim();
-  const privacy_policy_url = document.getElementById('app-privacy-url').value.trim() || '#privacy';
-  const terms_url = document.getElementById('app-terms-url').value.trim() || '#terms';
+  const privacy_policy_url = document.getElementById('app-privacy-url').value.trim() || '#privacy-policy';
+  const terms_url = document.getElementById('app-terms-url').value.trim() || '#terms-and-conditions';
 
   const appData = {
     title,
@@ -327,7 +365,7 @@ export async function handleSaveApp(e) {
     } else {
       const { error } = await supabaseClient.from('apps').insert([appData]);
       if (error) throw error;
-      showToast('New application published to catalog!', 'success');
+      showToast('Application added to live catalog!', 'success');
     }
 
     resetAppForm();
@@ -359,14 +397,14 @@ export async function editAppById(id) {
   document.getElementById('app-id').value = app.id;
   document.getElementById('app-title').value = app.title || '';
   document.getElementById('app-category').value = app.category || '';
-  document.getElementById('app-icon').value = app.icon_text || '✦';
+  document.getElementById('app-icon').value = app.icon_text || '★';
   document.getElementById('app-badge').value = app.badge || '';
   document.getElementById('app-status').value = app.status || 'published';
   document.getElementById('app-sort').value = app.sort_order ?? 0;
   document.getElementById('app-desc').value = app.description || '';
   document.getElementById('app-play-url').value = app.play_store_url || '';
-  document.getElementById('app-privacy-url').value = app.privacy_policy_url || '#privacy';
-  document.getElementById('app-terms-url').value = app.terms_url || '#terms';
+  document.getElementById('app-privacy-url').value = app.privacy_policy_url || '#privacy-policy';
+  document.getElementById('app-terms-url').value = app.terms_url || '#terms-and-conditions';
 
   document.getElementById('form-app-heading').textContent = `Editing: ${app.title}`;
   document.getElementById('btn-save-app').textContent = 'Update Application';
@@ -378,9 +416,9 @@ export async function editAppById(id) {
 export function resetAppForm() {
   document.getElementById('form-app').reset();
   document.getElementById('app-id').value = '';
-  document.getElementById('app-privacy-url').value = '#privacy';
-  document.getElementById('app-terms-url').value = '#terms';
-  document.getElementById('app-icon').value = '✦';
+  document.getElementById('app-privacy-url').value = '#privacy-policy';
+  document.getElementById('app-terms-url').value = '#terms-and-conditions';
+  document.getElementById('app-icon').value = '★';
   document.getElementById('app-sort').value = '0';
   document.getElementById('form-app-heading').textContent = 'Add New Application';
   document.getElementById('btn-save-app').textContent = 'Save Application';
@@ -401,7 +439,7 @@ export async function toggleAppStatus(id, currentStatus) {
 }
 
 export async function deleteAppById(id) {
-  if (!confirm('Are you sure you want to permanently remove this application from the catalog?')) return;
+  if (!confirm('Are you sure you want to permanently delete this application?')) return;
 
   try {
     const { error } = await supabaseClient.from('apps').delete().eq('id', id);
@@ -414,7 +452,6 @@ export async function deleteAppById(id) {
   }
 }
 
-// Helpers
 function getLocalApps() {
   const data = localStorage.getItem('ninestar_cached_apps');
   if (data) {
@@ -444,7 +481,7 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-// Attach action handlers to window for inline onclick compatibility
+// Global actions for inline event compatibility
 window.appActions = {
   editApp: editAppById,
   toggleStatus: toggleAppStatus,
@@ -454,15 +491,52 @@ window.appActions = {
   handleLogout: handleLogout
 };
 
+// Lifecycle initialization
 window.addEventListener('hashchange', handleRouting);
 window.addEventListener('DOMContentLoaded', () => {
-  const yearEl = document.getElementById('current-year');
-  if (yearEl) yearEl.textContent = new Date().getFullYear();
+  const R = document.documentElement;
 
+  // Reading progress bar
+  const bar = document.getElementById('bar');
+  if (bar) {
+    window.addEventListener('scroll', () => {
+      const h = R.scrollHeight - window.innerHeight;
+      bar.style.width = (h > 0 ? (window.scrollY / h * 100) : 0) + '%';
+    }, { passive: true });
+  }
+
+  // Dark/Light theme toggle
+  const themeBtn = document.getElementById('theme');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      const dark = R.dataset.theme ? R.dataset.theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      R.dataset.theme = dark ? 'light' : 'dark';
+    });
+  }
+
+  // Home links cleanup
+  document.querySelectorAll('[data-home]').forEach(a => {
+    a.addEventListener('click', () => {
+      document.body.classList.remove('policy');
+      document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+    });
+  });
+
+  // Spotlight on static cards
+  document.querySelectorAll('.card').forEach(c => {
+    c.addEventListener('pointermove', function(e) {
+      const r = c.getBoundingClientRect();
+      c.style.setProperty('--x', (e.clientX - r.left) + 'px');
+      c.style.setProperty('--y', (e.clientY - r.top) + 'px');
+    });
+  });
+
+  // Attach submit listeners
   document.getElementById('form-login')?.addEventListener('submit', handleLogin);
   document.getElementById('form-app')?.addEventListener('submit', handleSaveApp);
 
   handleRouting();
+  reveal();
   fetchPublicApps();
   setupRealtimeSubscription();
 });

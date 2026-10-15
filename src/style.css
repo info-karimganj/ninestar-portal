@@ -311,6 +311,17 @@ a:focus-visible, button:focus-visible {
   pointer-events: none;
 }
 
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 880px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .hero-grid {
   position: relative;
   z-index: 1;
@@ -318,6 +329,26 @@ a:focus-visible, button:focus-visible {
   grid-template-columns: 1.15fr 0.85fr;
   gap: 48px;
   align-items: center;
+}
+
+.hero-logo-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 28px;
+}
+
+.hero-logo-glow {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201, 162, 75, 0.28) 0%, rgba(201, 162, 75, 0.08) 55%, transparent 75%);
+  filter: blur(28px);
+  pointer-events: none;
+  z-index: 0;
+  animation: pulse 4s ease-in-out infinite alternate;
 }
 
 .kicker {
@@ -329,7 +360,7 @@ a:focus-visible, button:focus-visible {
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 6px 16px;
-  margin-bottom: 24px;
+  margin: 0 auto 24px;
   background: var(--surface);
 }
 
@@ -361,16 +392,18 @@ a:focus-visible, button:focus-visible {
 }
 
 .hero p {
-  max-width: 34em;
+  max-width: 38em;
   color: var(--muted);
   font-size: 18.5px;
-  margin: 0 0 34px;
+  margin: 0 auto 34px;
+  line-height: 1.65;
 }
 
 .cta {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .in {
@@ -976,12 +1009,21 @@ body.policy .page.active {
 }
 
 .hero img.brand-img {
-  height: 90px;
-  width: auto;
-  max-width: 380px;
+  width: clamp(140px, 18vw, 220px);
+  height: auto;
+  max-width: 100%;
   object-fit: contain;
-  margin: 0 0 24px -6px;
-  filter: drop-shadow(0 12px 30px var(--glow));
+  margin: 0 auto;
+  display: block;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 0 24px rgba(201, 162, 75, 0.28)) drop-shadow(0 10px 28px var(--glow));
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+.hero img.brand-img:hover {
+  transform: scale(1.03);
+  filter: drop-shadow(0 0 32px rgba(201, 162, 75, 0.42)) drop-shadow(0 14px 34px var(--glow));
 }
 
 .fcols img.brand-img {

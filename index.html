@@ -122,16 +122,8 @@
       </div>
     </div>
     
-    <!-- Dynamic Apps Grid -->
-    <div class="grid rv-stagger" id="apps-grid">
-      <!-- Skeleton Loading State -->
-      <article class="card rv" style="opacity:.6">
-        <div class="icon">✦</div>
-        <span class="badge">Connecting Database</span>
-        <h3>Loading applications...</h3>
-        <p>Retrieving verified applications from Nine Star Technologies catalog.</p>
-      </article>
-    </div>
+    <!-- Dynamic Apps Grid (100% Data Driven via Supabase) -->
+    <div class="grid rv-stagger" id="apps-grid"></div>
   </div></section>
 
   <!-- Services Bento Section -->
@@ -789,12 +781,25 @@
             <textarea id="app-desc" placeholder="Comprehensive application summary showcasing key features..." required></textarea>
           </div>
           <div class="form-group">
-            <label for="app-privacy-url">Privacy Policy URL</label>
-            <input type="text" id="app-privacy-url" placeholder="#privacy-policy or full URL" value="#privacy-policy">
+            <label for="app-slug">App Package ID / URL Slug</label>
+            <input type="text" id="app-slug" placeholder="e.g. com.ninestar.starpulse or starpulse">
+            <span style="font-size:11px;color:var(--muted)">Direct policy URL: #privacy?app=&lt;slug&gt;</span>
+          </div>
+          <div class="form-group">
+            <label for="app-privacy-url">Privacy Policy Link (Default / Override)</label>
+            <input type="text" id="app-privacy-url" placeholder="#privacy?app=&lt;slug&gt; or external URL" value="#privacy-policy">
           </div>
           <div class="form-group">
             <label for="app-terms-url">Terms of Service URL</label>
             <input type="text" id="app-terms-url" placeholder="#terms-and-conditions or full URL" value="#terms-and-conditions">
+          </div>
+          <div class="form-group full">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <label for="app-privacy-content" style="margin:0">App Privacy Policy (Markdown / HTML) <span style="font-weight:400;color:var(--muted);font-size:12px">— Google Play Console Compliant</span></label>
+              <button type="button" class="btn small ghost" id="btn-gen-policy-template" style="padding:3px 10px;font-size:11.5px">⚡ Insert Compliant Template</button>
+            </div>
+            <textarea id="app-privacy-content" style="min-height:220px;font-family:monospace;font-size:13.5px;line-height:1.6" placeholder="# Privacy Policy for [App Name]&#10;&#10;**Effective Date:** October 2026&#10;**Developer/Publisher:** Nine Star Technologies&#10;..."></textarea>
+            <span style="font-size:11.5px;color:var(--muted)">Custom content rendered dynamically at <code>#privacy?app=&lt;slug_or_id&gt;</code>. If left empty, a compliant tailored policy is automatically generated from app metadata.</span>
           </div>
         </div>
 

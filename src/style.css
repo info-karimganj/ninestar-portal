@@ -1604,6 +1604,129 @@ tr:hover td {
   .hero .fl { margin-inline: auto; }
 }
 
+/* ==============================================================================
+   DYNAMIC PER-APP PRIVACY POLICY STYLES (Google Play Console Compliant)
+   ============================================================================== */
+.app-policy-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.app-policy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--gold) 8%, transparent);
+  margin-bottom: 12px;
+}
+
+.policy-quick-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin: 22px 0 28px;
+  padding: 16px 20px;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.policy-fact-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.policy-fact-label {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.policy-fact-val {
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.policy-render-wrap {
+  line-height: 1.8;
+  color: var(--ink);
+}
+
+.policy-render-wrap h1 {
+  font-family: var(--serif);
+  font-size: clamp(26px, 4vw, 36px);
+  margin: 0 0 10px;
+  line-height: 1.2;
+}
+
+.policy-render-wrap h2 {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--ink);
+  margin: 28px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.policy-render-wrap h3 {
+  font-size: 16.5px;
+  color: var(--gold);
+  margin: 20px 0 8px;
+  font-weight: 600;
+}
+
+.policy-render-wrap p {
+  color: var(--ink);
+  margin-bottom: 16px;
+  line-height: 1.75;
+}
+
+.policy-render-wrap ul, .policy-render-wrap ol {
+  color: var(--ink);
+  line-height: 1.75;
+  padding-left: 24px;
+  margin: 0 0 18px;
+}
+
+.policy-render-wrap li {
+  margin-bottom: 8px;
+}
+
+.policy-render-wrap code {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-family: monospace;
+}
+
+.policy-render-wrap blockquote {
+  margin: 20px 0;
+  padding: 14px 20px;
+  background: var(--bg2);
+  border-left: 4px solid var(--gold);
+  border-radius: 0 12px 12px 0;
+  color: var(--ink);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation: none !important;

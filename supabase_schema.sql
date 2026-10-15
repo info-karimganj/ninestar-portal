@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS public.apps (
     badge TEXT DEFAULT 'Mobile application',
     play_store_url TEXT,
     privacy_policy_url TEXT DEFAULT '#privacy-policy',
+    privacy_policy_content TEXT,
+    slug TEXT,
     terms_url TEXT DEFAULT '#terms-and-conditions',
     status TEXT NOT NULL DEFAULT 'published' CHECK (status IN ('published', 'draft', 'archived')),
     sort_order INT NOT NULL DEFAULT 0,
@@ -20,8 +22,10 @@ CREATE TABLE IF NOT EXISTS public.apps (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- Ensure icon_url exists if table was previously created
+-- Ensure columns exist if table was previously created
 ALTER TABLE public.apps ADD COLUMN IF NOT EXISTS icon_url TEXT;
+ALTER TABLE public.apps ADD COLUMN IF NOT EXISTS privacy_policy_content TEXT;
+ALTER TABLE public.apps ADD COLUMN IF NOT EXISTS slug TEXT;
 
 -- 2. Create table for editable Website Settings / Content (Hero, About, Contact, Services, Legal)
 CREATE TABLE IF NOT EXISTS public.site_settings (
@@ -68,9 +72,27 @@ CREATE POLICY "Authenticated users can update site settings"
     USING (true)
     WITH CHECK (true);
 
--- 5. Realtime publication
-ALTER PUBLICATION supabase_realtime ADD TABLE public.apps;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.site_settings;
+-- 5. Realtime publication (Safely add table only if not already a member)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' 
+          AND schemaname = 'public' 
+          AND tablename = 'apps'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.apps;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' 
+          AND schemaname = 'public' 
+          AND tablename = 'site_settings'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.site_settings;
+    END IF;
+END $$;
 
 -- 6. Trigger for updated_at timestamp
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
@@ -93,46 +115,10 @@ CREATE TRIGGER trigger_site_settings_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION public.handle_updated_at();
 
--- 7. Insert initial seed data for Nine Star Technologies Apps
-INSERT INTO public.apps (title, category, description, icon_text, badge, play_store_url, privacy_policy_url, terms_url, status, sort_order)
-VALUES
-(
-    'StarPulse Productivity',
-    'Mobile application',
-    'A minimalist task and habit orchestration suite designed for high-focus professionals with offline sync and encrypted cloud backups.',
-    '★',
-    'Featured on Play Store',
-    'https://play.google.com/store/apps/details?id=com.ninestar.starpulse',
-    '#privacy-policy',
-    '#terms-and-conditions',
-    'published',
-    1
-),
-(
-    'Zenith Habit Tracker',
-    'Mobile application',
-    'Behavioral science tracker assisting users in building lasting habits with micro-journaling and ambient audio.',
-    '✦',
-    'Popular',
-    'https://play.google.com/store/apps/details?id=com.ninestar.zenith',
-    '#privacy-policy',
-    '#terms-and-conditions',
-    'published',
-    2
-),
-(
-    'Custom Enterprise Suite',
-    'Enterprise and client solutions',
-    'Tailored software, API development, and web platforms built around client workflows and modern digital infrastructure.',
-    'E',
-    'Enterprise & Client Solutions',
-    '',
-    '#privacy-policy',
-    '#terms-and-conditions',
-    'published',
-    3
-)
-ON CONFLICT DO NOTHING;
+-- 7. Applications Catalog (Dynamic, 0 seed data)
+-- Admin can add applications directly through the Admin CMS panel.
+
+
 
 -- 8. Insert initial seed content for All Website Sections
 INSERT INTO public.site_settings (key, value)
@@ -243,8 +229,18 @@ CREATE POLICY "Allow authenticated admins full access to leads"
     USING (true)
     WITH CHECK (true);
 
--- Enable realtime for leads table
-ALTER PUBLICATION supabase_realtime ADD TABLE public.leads;
+-- Enable realtime for leads table (Safely add table only if not already a member)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' 
+          AND schemaname = 'public' 
+          AND tablename = 'leads'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.leads;
+    END IF;
+END $$;
 
 -- Trigger for leads updated_at
 DROP TRIGGER IF EXISTS trigger_leads_updated_at ON public.leads;

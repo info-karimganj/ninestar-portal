@@ -909,22 +909,47 @@ body.policy .page.active {
 
 .brand {
   display: block;
-  background: no-repeat center / contain;
+  background-image: url('/logo.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
   filter: drop-shadow(0 10px 26px var(--glow));
 }
 
-.brand.d {
-  display: none;
+.logo img.brand-img, .hero img.brand-img, .fcols img.brand-img {
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 24px var(--glow));
+}
+
+.logo img.brand-img {
+  height: 44px;
+  width: auto;
+  max-width: 200px;
+}
+
+.hero img.brand-img {
+  height: 72px;
+  width: auto;
+  max-width: 320px;
+  margin: 0 0 20px -4px;
+}
+
+.fcols img.brand-img {
+  height: 48px;
+  width: auto;
+  max-width: 220px;
+  margin: 0 0 14px -2px;
 }
 
 .wm {
-  width: 176px;
-  height: 43px;
+  width: 180px;
+  height: 46px;
 }
 
 .fl {
   aspect-ratio: 640 / 346;
-  width: min(250px, 64vw);
+  width: min(280px, 70vw);
 }
 
 .hero .fl {
@@ -934,23 +959,6 @@ body.policy .page.active {
 .fcols .fl {
   width: 210px;
   margin: 0 0 12px -4px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .brand.l {
-    display: none;
-  }
-  :root:not([data-theme="light"]) .brand.d {
-    display: block;
-  }
-}
-
-:root[data-theme="dark"] .brand.l {
-  display: none;
-}
-
-:root[data-theme="dark"] .brand.d {
-  display: block;
 }
 
 /* Admin Card & CMS Interface */

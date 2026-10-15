@@ -191,7 +191,15 @@ function applySiteSettingsToDOM(s) {
   const cBandBtn = document.getElementById('dyn-contact-band-btn');
   if (cBandBtn && s.email) {
     const subj = encodeURIComponent('Project Inquiry - ' + (s.company_name || 'Nine Star Technologies'));
-    cBandBtn.href = `mailto:${s.email}?subject=${subj}`;
+    const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+    if (isMobile) {
+      cBandBtn.href = `mailto:${s.email}?subject=${subj}`;
+      cBandBtn.removeAttribute('target');
+    } else {
+      cBandBtn.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(s.email)}&su=${subj}`;
+      cBandBtn.setAttribute('target', '_blank');
+      cBandBtn.setAttribute('rel', 'noopener noreferrer');
+    }
   }
 
   const cPhone = document.getElementById('dyn-contact-phone');
@@ -698,23 +706,33 @@ export function handleEmailCTA(e) {
   const btn = document.getElementById('dyn-contact-band-btn');
   const targetEmail = currentSettings.email || 'support@ninestartech.com';
   const mailSubject = encodeURIComponent('Project Inquiry - ' + (currentSettings.company_name || 'Nine Star Technologies'));
+  const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+
+  const gmailWebUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(targetEmail)}&su=${mailSubject}`;
   const mailtoUri = `mailto:${targetEmail}?subject=${mailSubject}`;
 
-  if (btn) btn.href = mailtoUri;
-
-  // Hybrid fallback: copy email to clipboard
+  // Copy email to clipboard silently/toast for extra convenience
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(targetEmail).then(() => {
-      showToast(`Copied ${targetEmail} to clipboard! Opening mail client...`, 'info');
+      showToast(`Opening Gmail for ${targetEmail}...`, 'info');
     }).catch(() => {
-      showToast(`Opening mail client for ${targetEmail}...`, 'info');
+      showToast(`Opening Gmail for ${targetEmail}...`, 'info');
     });
   } else {
-    showToast(`Opening mail client for ${targetEmail}...`, 'info');
+    showToast(`Opening Gmail for ${targetEmail}...`, 'info');
   }
 
-  // Allow native mailto navigation
-  window.location.href = mailtoUri;
+  if (isMobile) {
+    if (btn) btn.href = mailtoUri;
+    window.location.href = mailtoUri;
+  } else {
+    if (btn) {
+      btn.href = gmailWebUrl;
+      btn.target = '_blank';
+    }
+    window.open(gmailWebUrl, '_blank', 'noopener,noreferrer');
+  }
+
   if (e) e.preventDefault();
 }
 

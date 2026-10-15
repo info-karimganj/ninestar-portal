@@ -35,8 +35,10 @@ class ContactLeadRequest(BaseModel):
     service_type: Optional[str] = Field(None, max_length=100)
     message: str = Field(..., min_length=5, max_length=3000)
 
+import html
+
 # -----------------------------------------------------------------------------
-# Background Task: Telegram Bot Alert
+# Background Task: Telegram Bot Alert (HTML Mode with Full Character Escaping)
 # -----------------------------------------------------------------------------
 def send_telegram_alert(lead: ContactLeadRequest):
     bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -46,27 +48,28 @@ def send_telegram_alert(lead: ContactLeadRequest):
         print("[Telegram] Bot token or Chat ID not configured. Skipping alert.")
         return
 
-    name = lead.name.strip()
-    email = lead.email.strip()
-    phone = (lead.phone or "Not provided").strip()
-    service = (lead.service_type or "General Inquiry").strip()
-    message = lead.message.strip()
+    # Safely escape all fields using html.escape to eliminate 400 Bad Request entity parsing errors
+    safe_name = html.escape(str(lead.name).strip())
+    safe_email = html.escape(str(lead.email).strip())
+    safe_phone = html.escape(str(lead.phone or "Not provided").strip())
+    safe_service = html.escape(str(lead.service_type or "General Inquiry").strip())
+    safe_message = html.escape(str(lead.message).strip())
 
     telegram_text = (
-        "🚨 *New Client Lead - Nine Star Technologies*\n\n"
-        f"👤 *Name:* {name}\n"
-        f"📧 *Email:* `{email}`\n"
-        f"📞 *Phone:* `{phone}`\n"
-        f"🎯 *Service:* {service}\n\n"
-        f"📝 *Message:*\n_{message}_\n\n"
-        "⚡ _Generated via Official Portal API_"
+        "🚨 <b>New Client Lead - Nine Star Technologies</b>\n\n"
+        f"👤 <b>Name:</b> {safe_name}\n"
+        f"📧 <b>Email:</b> <code>{safe_email}</code>\n"
+        f"📞 <b>Phone:</b> {safe_phone}\n"
+        f"💼 <b>Service:</b> {safe_service}\n\n"
+        f"📝 <b>Message:</b>\n{safe_message}\n\n"
+        "⚡ <i>Generated via Official Portal API</i>"
     )
 
     telegram_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     payload = {
         "chat_id": chat_id,
         "text": telegram_text,
-        "parse_mode": "Markdown",
+        "parse_mode": "HTML",
         "disable_web_page_preview": True
     }
 
@@ -74,6 +77,8 @@ def send_telegram_alert(lead: ContactLeadRequest):
         res = requests.post(telegram_url, json=payload, timeout=8)
         if res.status_code != 200:
             print(f"[Telegram] Failed to send message: {res.status_code} - {res.text}")
+        else:
+            print("[Telegram] Alert delivered successfully.")
     except Exception as e:
         print(f"[Telegram] Error sending alert: {e}")
 

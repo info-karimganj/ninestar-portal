@@ -185,46 +185,45 @@
 
     <div class="contact-layout">
       <!-- Client Lead Submission Form -->
-      <div class="card rv contact-form-card">
-        <h3 style="font-size:22px;margin:0 0 8px">Send a Message</h3>
+      <div class="card rv contact-form-card glassmorphic-form">
+        <h3 style="font-size:22px;margin:0 0 8px">Send Proposal Request</h3>
         <p style="font-size:14.5px;color:var(--muted);margin-bottom:20px">Fill out the form below. We'll send an automatic confirmation to your email.</p>
         
         <form id="contact-lead-form" onsubmit="window.appActions.handleContactSubmit(event)">
           <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
             <div class="form-group">
-              <label for="lead-name">Your Name *</label>
+              <label for="lead-name">Full Name *</label>
               <input type="text" id="lead-name" name="name" required placeholder="e.g. John Doe">
             </div>
             <div class="form-group">
-              <label for="lead-email">Your Email *</label>
+              <label for="lead-email">Email Address *</label>
               <input type="email" id="lead-email" name="email" required placeholder="john@example.com">
             </div>
           </div>
 
           <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
             <div class="form-group">
-              <label for="lead-phone">Phone Number (Optional)</label>
-              <input type="text" id="lead-phone" name="phone" placeholder="+1 234 567 8900">
+              <label for="lead-phone">WhatsApp / Phone Number (Optional)</label>
+              <input type="tel" id="lead-phone" name="phone" placeholder="+1 234 567 8900">
             </div>
             <div class="form-group">
-              <label for="lead-service">Project / Service *</label>
+              <label for="lead-service">Project / Service Type *</label>
               <select id="lead-service" name="service_type" required>
-                <option value="Mobile App Development (Android/Flutter)">Mobile App Development (Android/Flutter)</option>
-                <option value="Web & SaaS Platform">Web & SaaS Platform</option>
-                <option value="Cloud Backend & API Architecture">Cloud Backend & API Architecture</option>
-                <option value="UI/UX Product Design">UI/UX Product Design</option>
-                <option value="General Technical Inquiry" selected>General Technical Inquiry</option>
+                <option value="Mobile App Development">Mobile App Development</option>
+                <option value="UI/UX Design">UI/UX Design</option>
+                <option value="Full-Stack System">Full-Stack System</option>
+                <option value="Other">Other</option>
               </select>
             </div>
           </div>
 
           <div class="form-group" style="margin-bottom:20px">
-            <label for="lead-message">Project Details / Message *</label>
+            <label for="lead-message">Message / Project Overview *</label>
             <textarea id="lead-message" name="message" rows="4" required placeholder="Tell us about your requirements, project goals, or timeline..."></textarea>
           </div>
 
-          <button type="submit" id="btn-submit-lead" class="btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
-            <span id="btn-submit-text">Send Message</span>
+          <button type="submit" id="btn-submit-lead" class="btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px">
+            <span id="btn-submit-text">Send Proposal Request</span>
             <span id="btn-submit-spinner" class="spinner" style="display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite"></span>
           </button>
         </form>

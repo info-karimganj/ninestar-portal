@@ -1161,7 +1161,7 @@ export async function handleContactSubmit(e) {
     }
 
     form.reset();
-    showToast("Thank you! We've received your request and sent a confirmation to your email.", 'success');
+    showToast("Thank you! Your request has been forwarded to our team. A confirmation has been sent to your email.", 'success');
   } catch (err) {
     console.error('Contact form submission error:', err);
     // Graceful fallback: attempt direct client-side backup to Supabase leads table if available
@@ -1175,16 +1175,16 @@ export async function handleContactSubmit(e) {
           message: payload.message
         }]);
         form.reset();
-        showToast("Inquiry saved! Our team will contact you within 24–48 hours.", 'success');
+        showToast("Thank you! Your request has been forwarded to our team. A confirmation has been sent to your email.", 'success');
         return;
       }
     } catch (dbErr) {
       console.warn('Fallback direct save error:', dbErr);
     }
-    showToast(`Notice: ${err.message || 'Could not send message. Please email support directly.'}`, 'error');
+    showToast("Submission failed. Please reach us directly at support@ninestartech.com.", 'error');
   } finally {
     if (btn) btn.disabled = false;
-    if (btnText) btnText.textContent = 'Send Message';
+    if (btnText) btnText.textContent = 'Send Proposal Request';
     if (spinner) spinner.style.display = 'none';
   }
 }

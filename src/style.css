@@ -952,6 +952,21 @@ h2 {
   border-color: var(--gold);
 }
 
+.glassmorphic-form {
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--line) 80%, var(--gold));
+  box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.08), 0 0 24px -8px var(--glow);
+}
+
+.glassmorphic-form input:focus,
+.glassmorphic-form select:focus,
+.glassmorphic-form textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201, 162, 75, 0.22);
+}
+
 .contact-card {
   position: relative;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;

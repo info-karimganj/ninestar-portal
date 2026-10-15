@@ -200,6 +200,19 @@ function applySiteSettingsToDOM(s) {
   const cLicense = document.getElementById('dyn-contact-license');
   if (cLicense && s.trade_license) cLicense.textContent = s.trade_license;
 
+  // Sync Terms & Conditions Legal section dynamic IDs
+  const legCompany = document.getElementById('dyn-legal-company');
+  if (legCompany && s.company_name) legCompany.textContent = s.company_name;
+
+  const legEmail = document.getElementById('dyn-legal-email');
+  if (legEmail && s.email) {
+    legEmail.textContent = s.email;
+    legEmail.href = `mailto:${s.email}`;
+  }
+
+  const legAddress = document.getElementById('dyn-legal-address');
+  if (legAddress && s.address) legAddress.textContent = s.address;
+
   // Populate form if open
   populateSettingsForm(s);
 }

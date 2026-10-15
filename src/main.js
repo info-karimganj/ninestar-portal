@@ -535,6 +535,14 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('form-login')?.addEventListener('submit', handleLogin);
   document.getElementById('form-app')?.addEventListener('submit', handleSaveApp);
 
+  // Secret shortcut: Press Ctrl + Shift + A to open Admin CMS
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+      e.preventDefault();
+      window.location.hash = '#admin';
+    }
+  });
+
   handleRouting();
   reveal();
   fetchPublicApps();

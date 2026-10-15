@@ -1117,6 +1117,78 @@ export function clearScrapedIcon() {
   showToast('Scraped icon removed. Form will use fallback symbol.', 'info');
 }
 
+export async function handleContactSubmit(e) {
+  if (e) e.preventDefault();
+
+  const form = document.getElementById('contact-lead-form');
+  if (!form) return;
+
+  const btn = document.getElementById('btn-submit-lead');
+  const btnText = document.getElementById('btn-submit-text');
+  const spinner = document.getElementById('btn-submit-spinner');
+
+  const payload = {
+    name: document.getElementById('lead-name')?.value.trim() || '',
+    email: document.getElementById('lead-email')?.value.trim() || '',
+    phone: document.getElementById('lead-phone')?.value.trim() || '',
+    service_type: document.getElementById('lead-service')?.value || 'General Technical Inquiry',
+    message: document.getElementById('lead-message')?.value.trim() || ''
+  };
+
+  if (!payload.name || !payload.email || !payload.message) {
+    showToast('Please fill out all required fields (*)', 'error');
+    return;
+  }
+
+  // Set loading state
+  if (btn) btn.disabled = true;
+  if (btnText) btnText.textContent = 'Submitting inquiry...';
+  if (spinner) spinner.style.display = 'inline-block';
+
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data.message || data.detail || `Server returned error status ${res.status}`);
+    }
+
+    form.reset();
+    showToast("Thank you! We've received your request and sent a confirmation to your email.", 'success');
+  } catch (err) {
+    console.error('Contact form submission error:', err);
+    // Graceful fallback: attempt direct client-side backup to Supabase leads table if available
+    try {
+      if (supabaseClient) {
+        await supabaseClient.from('leads').insert([{
+          name: payload.name,
+          email: payload.email,
+          phone: payload.phone,
+          service_type: payload.service_type,
+          message: payload.message
+        }]);
+        form.reset();
+        showToast("Inquiry saved! Our team will contact you within 24–48 hours.", 'success');
+        return;
+      }
+    } catch (dbErr) {
+      console.warn('Fallback direct save error:', dbErr);
+    }
+    showToast(`Notice: ${err.message || 'Could not send message. Please email support directly.'}`, 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+    if (btnText) btnText.textContent = 'Send Message';
+    if (spinner) spinner.style.display = 'none';
+  }
+}
+
 // Global actions for inline event compatibility
 window.appActions = {
   editApp: editAppById,
@@ -1132,7 +1204,8 @@ window.appActions = {
   loadSocialLinks: () => populateSocialForm(currentSocialLinks),
   handleEmailCTA: handleEmailCTA,
   handlePlayUrlInput: handlePlayUrlInput,
-  clearScrapedIcon: clearScrapedIcon
+  clearScrapedIcon: clearScrapedIcon,
+  handleContactSubmit: handleContactSubmit
 };
 
 // Lifecycle initialization

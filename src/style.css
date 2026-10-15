@@ -936,6 +936,22 @@ h2 {
   box-shadow: 0 20px 60px -20px var(--glow);
 }
 
+.contact-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.contact-form-card {
+  position: relative;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.contact-form-card:hover {
+  border-color: var(--gold);
+}
+
 .contact-card {
   position: relative;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
@@ -1529,7 +1545,7 @@ tr:hover td {
 }
 
 @media (max-width: 820px) {
-  .hero-grid, .about {
+  .hero-grid, .about, .contact-layout {
     grid-template-columns: 1fr;
   }
   .stage {

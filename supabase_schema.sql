@@ -210,3 +210,47 @@ VALUES
 ('github', 'github', '', true)
 ON CONFLICT (id) DO NOTHING;
 
+-- ==============================================================================
+-- 4. LEADS & INQUIRIES AUTOMATION TABLE
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.leads (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT,
+    service_type TEXT DEFAULT 'General Inquiry',
+    message TEXT NOT NULL,
+    status TEXT DEFAULT 'new' CHECK (status IN ('new', 'contacted', 'in_progress', 'closed')),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS on leads table
+ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
+
+-- Allow public / anon users to submit contact leads via website
+CREATE POLICY "Allow public inserts for leads"
+    ON public.leads
+    FOR INSERT
+    TO anon, authenticated
+    WITH CHECK (true);
+
+-- Allow authenticated admins to view, update, and manage leads
+CREATE POLICY "Allow authenticated admins full access to leads"
+    ON public.leads
+    FOR ALL
+    TO authenticated
+    USING (true)
+    WITH CHECK (true);
+
+-- Enable realtime for leads table
+ALTER PUBLICATION supabase_realtime ADD TABLE public.leads;
+
+-- Trigger for leads updated_at
+DROP TRIGGER IF EXISTS trigger_leads_updated_at ON public.leads;
+CREATE TRIGGER trigger_leads_updated_at
+    BEFORE UPDATE ON public.leads
+    FOR EACH ROW
+    EXECUTE FUNCTION public.handle_updated_at();
+
+

@@ -180,25 +180,77 @@
          rel="noopener noreferrer" 
          onclick="window.appActions.handleEmailCTA(event)">Email us</a>
     </div>
-    <div class="sec-head rv"><div class="rule"></div><h2>Contact and office</h2></div>
-    <div class="card rv contact-card" style="max-width:700px">
-      <dl>
-        <dt>Company</dt><dd><strong id="dyn-contact-company">Nine Star Technologies</strong></dd>
-        <dt>Email</dt><dd><a id="dyn-contact-email" href="mailto:support@yourdomain.com" style="color:var(--gold)">support@yourdomain.com</a></dd>
-        <dt>Phone</dt><dd id="dyn-contact-phone">+000 0000 000000</dd>
-        <dt>Address</dt><dd id="dyn-contact-address">Bhatia Zahirkona, Niamatpur, Karimganj, Kishoreganj 2310, Dhaka Division, Bangladesh</dd>
-        <dt>Trade license</dt><dd id="dyn-contact-license">No. 20262320000465, Dehunda Union Parishad, Karimganj, Kishoreganj</dd>
-      </dl>
 
-      <!-- Dynamic Social Media Profiles -->
-      <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:20px">
-        <h4 style="font-size:14px;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);margin:0 0 14px">Connect with Nine Star Technologies</h4>
-        <div class="social-bar" id="contact-social-bar">
-          <!-- Dynamic Social Icons Rendered from Supabase -->
-        </div>
+    <div class="sec-head rv"><div class="rule"></div><h2>Get in touch</h2><p class="lead">Send us your project inquiry or visit our developer studio.</p></div>
+
+    <div class="contact-layout">
+      <!-- Client Lead Submission Form -->
+      <div class="card rv contact-form-card">
+        <h3 style="font-size:22px;margin:0 0 8px">Send a Message</h3>
+        <p style="font-size:14.5px;color:var(--muted);margin-bottom:20px">Fill out the form below. We'll send an automatic confirmation to your email.</p>
+        
+        <form id="contact-lead-form" onsubmit="window.appActions.handleContactSubmit(event)">
+          <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+            <div class="form-group">
+              <label for="lead-name">Your Name *</label>
+              <input type="text" id="lead-name" name="name" required placeholder="e.g. John Doe">
+            </div>
+            <div class="form-group">
+              <label for="lead-email">Your Email *</label>
+              <input type="email" id="lead-email" name="email" required placeholder="john@example.com">
+            </div>
+          </div>
+
+          <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+            <div class="form-group">
+              <label for="lead-phone">Phone Number (Optional)</label>
+              <input type="text" id="lead-phone" name="phone" placeholder="+1 234 567 8900">
+            </div>
+            <div class="form-group">
+              <label for="lead-service">Project / Service *</label>
+              <select id="lead-service" name="service_type" required>
+                <option value="Mobile App Development (Android/Flutter)">Mobile App Development (Android/Flutter)</option>
+                <option value="Web & SaaS Platform">Web & SaaS Platform</option>
+                <option value="Cloud Backend & API Architecture">Cloud Backend & API Architecture</option>
+                <option value="UI/UX Product Design">UI/UX Product Design</option>
+                <option value="General Technical Inquiry" selected>General Technical Inquiry</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:20px">
+            <label for="lead-message">Project Details / Message *</label>
+            <textarea id="lead-message" name="message" rows="4" required placeholder="Tell us about your requirements, project goals, or timeline..."></textarea>
+          </div>
+
+          <button type="submit" id="btn-submit-lead" class="btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
+            <span id="btn-submit-text">Send Message</span>
+            <span id="btn-submit-spinner" class="spinner" style="display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite"></span>
+          </button>
+        </form>
       </div>
 
-      <p class="note" style="margin-top:20px">We aim to respond to all user inquiries within 24–48 hours.</p>
+      <!-- Office & Company Details Card -->
+      <div class="card rv contact-card">
+        <h3 style="font-size:22px;margin:0 0 14px">Corporate Office</h3>
+        <dl>
+          <dt>Company</dt><dd><strong id="dyn-contact-company">Nine Star Technologies</strong></dd>
+          <dt>Email</dt><dd><a id="dyn-contact-email" href="mailto:support@yourdomain.com" style="color:var(--gold)">support@yourdomain.com</a></dd>
+          <dt>Phone</dt><dd id="dyn-contact-phone">+000 0000 000000</dd>
+          <dt>Address</dt><dd id="dyn-contact-address">Bhatia Zahirkona, Niamatpur, Karimganj, Kishoreganj 2310, Dhaka Division, Bangladesh</dd>
+          <dt>Trade license</dt><dd id="dyn-contact-license">No. 20262320000465, Dehunda Union Parishad, Karimganj, Kishoreganj</dd>
+        </dl>
+
+        <!-- Dynamic Social Media Profiles -->
+        <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:20px">
+          <h4 style="font-size:14px;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);margin:0 0 14px">Connect with Nine Star Technologies</h4>
+          <div class="social-bar" id="contact-social-bar">
+            <!-- Dynamic Social Icons Rendered from Supabase -->
+          </div>
+        </div>
+
+        <p class="note" style="margin-top:20px">We aim to respond to all user inquiries within 24–48 hours.</p>
+      </div>
     </div>
   </div></section>
 </main>

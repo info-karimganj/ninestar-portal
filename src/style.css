@@ -1154,14 +1154,6 @@ body:not(.policy) .home {
   max-width: 44em;
 }
 
-body.policy .home {
-  display: none;
-}
-
-body.policy .page.active {
-  display: block;
-}
-
 .brand {
   display: block;
   background-image: url('/logo.png');

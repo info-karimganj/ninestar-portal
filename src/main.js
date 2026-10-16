@@ -11,11 +11,11 @@ const DEFAULT_SITE_SETTINGS = {
   phone: '+000 0000 000000',
   address: 'Bhatia Zahirkona, Niamatpur, Karimganj, Kishoreganj 2310, Dhaka Division, Bangladesh',
   trade_license: 'No. 20262320000465, Dehunda Union Parishad, Karimganj, Kishoreganj',
-  hero_kicker: 'Software studio for Android, web and cloud',
-  hero_title: 'Crafting high-performance mobile and digital solutions',
-  hero_desc: 'At Nine Star Technologies, we design and engineer scalable Android applications, intuitive web platforms, and smart digital utilities for everyday users and modern businesses.',
+  hero_kicker: 'Software, Android Apps & Cloud Systems',
+  hero_title: 'Crafting High-Performance Software, Android Apps & Cloud Systems',
+  hero_desc: 'A software and technology studio dedicated to building resilient mobile architectures, intuitive digital platforms, and scalable cloud solutions.',
   about_title: 'About us',
-  about_desc: 'Nine Star Technologies is an independent technology and software development company focused on building reliable mobile applications and modern digital infrastructure. We specialize in cross-platform app architecture, native Android experiences, and secure cloud integrations, delivering tools that simplify productivity, finance, and daily life.'
+  about_desc: 'Nine Star Technologies is an independent software studio specializing in native Android engineering, full-stack web architectures, secure cloud backend integrations, and privacy-first digital platforms.'
 };
 
 // Preset Social Media Platforms & Default state
@@ -371,13 +371,12 @@ export function handleRouting() {
 
   document.body.classList.toggle('policy', isPolicy);
 
-  // Toggle pages with transition reset
+  // Toggle pages with transition reset (Only policy / admin pages)
   document.querySelectorAll('.page').forEach(x => {
     let isTarget = false;
     if (isAdmin && x.id === 'page-admin') isTarget = true;
     else if (isPrivacy && x.id === 'privacy-policy') isTarget = true;
     else if (isTerms && x.id === 'terms-and-conditions') isTarget = true;
-    else if (x.id === hashBase) isTarget = true;
 
     if (isTarget) {
       x.classList.remove('active');
@@ -393,12 +392,19 @@ export function handleRouting() {
   if (isPolicy) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else if (hashBase && hashBase !== 'top') {
+    // Normal section anchor navigation (#about, #products, #services, #process, #contact)
+    document.title = 'Nine Star Technologies | Software, Android Apps & Cloud Systems';
     const el = document.getElementById(hashBase);
     if (el) {
-      setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 50);
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth' });
+        reveal();
+      }, 50);
+    } else {
+      reveal();
     }
   } else {
-    // Returning to home view: refresh reveal states and reset document title
+    // Returning to top of home view
     document.title = 'Nine Star Technologies | Official Developer Organization';
     setTimeout(() => reveal(), 80);
   }
@@ -808,7 +814,7 @@ export async function fetchPublicApps() {
     // Check if database returned 0 rows
     if (!data || data.length === 0) {
       localStorage.setItem('ninestar_cached_apps', JSON.stringify([]));
-      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gold);"><p>No live applications currently listed.</p></div>';
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gold);"><p>Verified applications synced from Google Play Console will appear here.</p></div>';
       return;
     }
 
@@ -818,7 +824,7 @@ export async function fetchPublicApps() {
     return;
   } catch (err) {
     console.warn('Could not fetch apps from Supabase live:', err);
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gold);"><p>No live applications currently listed.</p></div>';
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gold);"><p>Verified applications synced from Google Play Console will appear here.</p></div>';
   }
 }
 
@@ -827,7 +833,7 @@ export function renderPublicApps(apps) {
   if (!grid) return;
 
   if (!apps || apps.length === 0) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gold);"><p>No live applications currently listed.</p></div>';
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gold);"><p>Verified applications synced from Google Play Console will appear here.</p></div>';
     return;
   }
 

@@ -102,7 +102,7 @@
     <div class="rv"><div class="rule"></div><h2 id="dyn-about-title">About us</h2>
       <p id="dyn-about-desc"><strong>Nine Star Technologies</strong> is an independent technology and software development company focused on building reliable mobile applications and modern digital infrastructure. We specialize in cross-platform app architecture, native Android experiences, and secure cloud integrations, delivering tools that simplify productivity, finance, and daily life.</p>
     </div>
-    <div class="facts rv rv-stagger">
+    <div class="facts rv rv-stagger" id="facts-grid">
       <div class="fact"><strong>Cross-platform architecture</strong><span>One codebase, consistent quality on every device.</span></div>
       <div class="fact"><strong>Native Android experiences</strong><span>Fast, stable apps built for real phones.</span></div>
       <div class="fact"><strong>Secure cloud integrations</strong><span>Reliable back ends your data can trust.</span></div>
@@ -137,21 +137,24 @@
   <!-- Services Bento Section -->
   <section id="services" class="alt"><div class="wrap">
     <div class="sec-head rv"><div class="rule"></div><h2>Services</h2><p class="lead">From first sketch to store release and beyond.</p></div>
-    <div class="bento rv rv-stagger">
+    <div class="bento rv rv-stagger" id="services-grid">
       <div class="card big rv">
         <div class="icon">★</div>
         <h3>Android and cross-platform apps</h3>
         <p>Native Android and Flutter apps built for speed, stability, and long-term maintenance, ready for Google Play.</p>
       </div>
       <div class="card rv">
+        <div class="icon">★</div>
         <h3>Web platforms</h3>
         <p>Responsive websites and dashboards with clean interfaces and fast load times.</p>
       </div>
       <div class="card rv">
+        <div class="icon">★</div>
         <h3>Cloud and automation</h3>
         <p>Secure cloud integrations and automation that remove repetitive business work.</p>
       </div>
       <div class="card big rv">
+        <div class="icon">★</div>
         <h3>UI and UX design</h3>
         <p>Interfaces that feel simple on day one and still hold up as your product grows.</p>
       </div>
@@ -609,6 +612,9 @@
         <button class="tab-btn active" id="tab-btn-content" onclick="window.appActions.switchTab('content')">
           📝 Website Content & Contact Info
         </button>
+        <button class="tab-btn" id="tab-btn-services" onclick="window.appActions.switchTab('services')">
+          ⚡ Services & About Highlights
+        </button>
         <button class="tab-btn" id="tab-btn-social" onclick="window.appActions.switchTab('social')">
           🌐 Social Media Profiles
         </button>
@@ -671,6 +677,43 @@
           <div style="margin-top:14px;display:flex;gap:10px">
             <button type="submit" class="btn" id="btn-save-settings">Save Website Changes</button>
             <button type="button" class="btn ghost" onclick="window.appActions.loadSiteSettings()">Reset to Saved</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 1.5: SERVICES & ABOUT HIGHLIGHTS MANAGER -->
+    <div id="admin-tab-services" style="display:none">
+      <div class="admin-card">
+        <h3 style="font-family:var(--serif);font-size:22px;margin:0 0 6px">Services Bento & Company Values Editor</h3>
+        <p style="margin:0 0 20px;font-size:14px;color:var(--muted)">Dynamically customize the cards displayed in the Services section and About Us highlights. Changes update both public views in real time.</p>
+
+        <form id="form-services-settings" onsubmit="window.appActions.saveServicesSettings(event)">
+          <!-- Services Bento Manager -->
+          <div style="margin-bottom:28px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+              <h4 style="font-size:17px;margin:0;color:var(--gold);font-family:var(--serif)">Services Bento Grid Cards</h4>
+              <button type="button" class="btn small ghost" onclick="window.appActions.addServiceRow()">+ Add Service Card</button>
+            </div>
+            <div id="admin-services-list">
+              <!-- Dynamically populated rows -->
+            </div>
+          </div>
+
+          <!-- Company Values / About Facts Manager -->
+          <div style="border-top:1px solid var(--line);padding-top:22px;margin-bottom:22px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+              <h4 style="font-size:17px;margin:0;color:var(--gold);font-family:var(--serif)">About Section Highlight Facts</h4>
+              <button type="button" class="btn small ghost" onclick="window.appActions.addValueRow()">+ Add Fact Highlight</button>
+            </div>
+            <div id="admin-values-list">
+              <!-- Dynamically populated rows -->
+            </div>
+          </div>
+
+          <div style="margin-top:20px;display:flex;gap:10px">
+            <button type="submit" class="btn" id="btn-save-services">Save Services & Highlights</button>
+            <button type="button" class="btn ghost" onclick="window.appActions.loadServicesSettings()">Reset to Saved</button>
           </div>
         </form>
       </div>

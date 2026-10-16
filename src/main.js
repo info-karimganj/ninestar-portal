@@ -15,7 +15,47 @@ const DEFAULT_SITE_SETTINGS = {
   hero_title: 'Crafting high-performance mobile and digital solutions',
   hero_desc: 'At Nine Star Technologies, we design and engineer scalable Android applications, intuitive web platforms, and smart digital utilities for everyday users and modern businesses.',
   about_title: 'About us',
-  about_desc: 'Nine Star Technologies is an independent technology and software development company focused on building reliable mobile applications and modern digital infrastructure. We specialize in cross-platform app architecture, native Android experiences, and secure cloud integrations, delivering tools that simplify productivity, finance, and daily life.'
+  about_desc: 'Nine Star Technologies is an independent technology and software development company focused on building reliable mobile applications and modern digital infrastructure. We specialize in cross-platform app architecture, native Android experiences, and secure cloud integrations, delivering tools that simplify productivity, finance, and daily life.',
+  services_list: [
+    {
+      icon: '★',
+      title: 'Android and cross-platform apps',
+      desc: 'Native Android and Flutter apps built for speed, stability, and long-term maintenance, ready for Google Play.',
+      is_big: true
+    },
+    {
+      icon: '★',
+      title: 'Web platforms',
+      desc: 'Responsive websites and dashboards with clean interfaces and fast load times.',
+      is_big: false
+    },
+    {
+      icon: '★',
+      title: 'Cloud and automation',
+      desc: 'Secure cloud integrations and automation that remove repetitive business work.',
+      is_big: false
+    },
+    {
+      icon: '★',
+      title: 'UI and UX design',
+      desc: 'Interfaces that feel simple on day one and still hold up as your product grows.',
+      is_big: true
+    }
+  ],
+  company_values: [
+    {
+      title: 'Cross-platform architecture',
+      desc: 'One codebase, consistent quality on every device.'
+    },
+    {
+      title: 'Native Android experiences',
+      desc: 'Fast, stable apps built for real phones.'
+    },
+    {
+      title: 'Secure cloud integrations',
+      desc: 'Reliable back ends your data can trust.'
+    }
+  ]
 };
 
 // Preset Social Media Platforms & Default state
@@ -245,8 +285,42 @@ function applySiteSettingsToDOM(s) {
   const legAddress = document.getElementById('dyn-legal-address');
   if (legAddress && s.address) legAddress.textContent = s.address;
 
+  // Render Dynamic About Facts / Company Values
+  const factsGrid = document.getElementById('facts-grid');
+  if (factsGrid && Array.isArray(s.company_values) && s.company_values.length > 0) {
+    factsGrid.innerHTML = s.company_values.map(val => `
+      <div class="fact">
+        <strong>${escapeHtml(val.title)}</strong>
+        <span>${escapeHtml(val.desc)}</span>
+      </div>
+    `).join('');
+  }
+
+  // Render Dynamic Services Bento Grid
+  const servicesGrid = document.getElementById('services-grid');
+  if (servicesGrid && Array.isArray(s.services_list) && s.services_list.length > 0) {
+    servicesGrid.innerHTML = s.services_list.map((srv, idx) => `
+      <div class="card ${srv.is_big ? 'big ' : ''}rv on" style="animation-delay:${idx * 0.1}s">
+        <div class="icon">${escapeHtml(srv.icon || '★')}</div>
+        <h3>${escapeHtml(srv.title)}</h3>
+        <p>${escapeHtml(srv.desc)}</p>
+      </div>
+    `).join('');
+
+    // Attach card spotlight hover listener to dynamically rendered services
+    servicesGrid.querySelectorAll('.card').forEach(c => {
+      c.addEventListener('pointermove', function(e) {
+        const r = c.getBoundingClientRect();
+        c.style.setProperty('--x', (e.clientX - r.left) + 'px');
+        c.style.setProperty('--y', (e.clientY - r.top) + 'px');
+      });
+    });
+  }
+
   // Populate form if open
   populateSettingsForm(s);
+  populateServicesForm(s);
+  reveal();
 }
 
 function populateSettingsForm(s) {
@@ -281,10 +355,155 @@ function populateSettingsForm(s) {
   if (fAboutDesc) fAboutDesc.value = s.about_desc || '';
 }
 
+export function populateServicesForm(s) {
+  const sList = document.getElementById('admin-services-list');
+  const vList = document.getElementById('admin-values-list');
+  if (!sList && !vList) return;
+
+  const services = Array.isArray(s.services_list) ? s.services_list : DEFAULT_SITE_SETTINGS.services_list;
+  const values = Array.isArray(s.company_values) ? s.company_values : DEFAULT_SITE_SETTINGS.company_values;
+
+  if (sList) {
+    sList.innerHTML = services.map((srv, idx) => `
+      <div class="service-admin-item" data-index="${idx}">
+        <div>
+          <label style="font-size:12px;color:var(--muted)">Icon</label>
+          <input type="text" class="srv-icon" value="${escapeHtml(srv.icon || '★')}" style="width:100%;text-align:center">
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--muted)">Service Title</label>
+          <input type="text" class="srv-title" value="${escapeHtml(srv.title || '')}" placeholder="Service Title" required style="width:100%">
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--muted)">Description</label>
+          <input type="text" class="srv-desc" value="${escapeHtml(srv.desc || '')}" placeholder="Description" required style="width:100%">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding-top:14px">
+          <label style="font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" class="srv-big" ${srv.is_big ? 'checked' : ''}> Wide Card
+          </label>
+        </div>
+        <div style="padding-top:14px;text-align:right">
+          <button type="button" class="btn small danger" onclick="window.appActions.removeServiceRow(${idx})" title="Delete Service">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  if (vList) {
+    vList.innerHTML = values.map((val, idx) => `
+      <div class="service-admin-item" data-index="${idx}" style="grid-template-columns: 1fr 1fr 60px">
+        <div>
+          <label style="font-size:12px;color:var(--muted)">Fact Heading</label>
+          <input type="text" class="val-title" value="${escapeHtml(val.title || '')}" placeholder="e.g. Cross-platform architecture" required style="width:100%">
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--muted)">Fact Description</label>
+          <input type="text" class="val-desc" value="${escapeHtml(val.desc || '')}" placeholder="e.g. One codebase, consistent quality..." required style="width:100%">
+        </div>
+        <div style="padding-top:14px;text-align:right">
+          <button type="button" class="btn small danger" onclick="window.appActions.removeValueRow(${idx})" title="Delete Fact">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+export function addServiceRow() {
+  const services = currentSettings.services_list || [...DEFAULT_SITE_SETTINGS.services_list];
+  services.push({
+    icon: '★',
+    title: 'New Service',
+    desc: 'Description of the specialized technical service provided.',
+    is_big: false
+  });
+  currentSettings.services_list = services;
+  populateServicesForm(currentSettings);
+}
+
+export function removeServiceRow(index) {
+  const services = currentSettings.services_list || [...DEFAULT_SITE_SETTINGS.services_list];
+  services.splice(index, 1);
+  currentSettings.services_list = services;
+  populateServicesForm(currentSettings);
+}
+
+export function addValueRow() {
+  const values = currentSettings.company_values || [...DEFAULT_SITE_SETTINGS.company_values];
+  values.push({
+    title: 'New Value Highlight',
+    desc: 'High standard of engineering and client commitment.'
+  });
+  currentSettings.company_values = values;
+  populateServicesForm(currentSettings);
+}
+
+export function removeValueRow(index) {
+  const values = currentSettings.company_values || [...DEFAULT_SITE_SETTINGS.company_values];
+  values.splice(index, 1);
+  currentSettings.company_values = values;
+  populateServicesForm(currentSettings);
+}
+
+export async function handleSaveServicesSettings(e) {
+  if (e) e.preventDefault();
+
+  const serviceItems = document.querySelectorAll('#admin-services-list .service-admin-item');
+  const services_list = Array.from(serviceItems).map(item => ({
+    icon: item.querySelector('.srv-icon')?.value.trim() || '★',
+    title: item.querySelector('.srv-title')?.value.trim() || '',
+    desc: item.querySelector('.srv-desc')?.value.trim() || '',
+    is_big: item.querySelector('.srv-big')?.checked || false
+  })).filter(s => s.title);
+
+  const valueItems = document.querySelectorAll('#admin-values-list .service-admin-item');
+  const company_values = Array.from(valueItems).map(item => ({
+    title: item.querySelector('.val-title')?.value.trim() || '',
+    desc: item.querySelector('.val-desc')?.value.trim() || ''
+  })).filter(v => v.title);
+
+  const updatedSettings = {
+    ...currentSettings,
+    services_list,
+    company_values
+  };
+
+  const btn = document.getElementById('btn-save-services');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Saving to database...';
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from('site_settings')
+      .upsert({ key: 'general', value: updatedSettings }, { onConflict: 'key' });
+
+    if (error) throw error;
+
+    currentSettings = updatedSettings;
+    localStorage.setItem('ninestar_site_settings', JSON.stringify(updatedSettings));
+    applySiteSettingsToDOM(updatedSettings);
+    showToast('Services and highlights updated live across site!', 'success');
+  } catch (err) {
+    console.warn('Error saving services to Supabase, saved locally:', err);
+    currentSettings = updatedSettings;
+    localStorage.setItem('ninestar_site_settings', JSON.stringify(updatedSettings));
+    applySiteSettingsToDOM(updatedSettings);
+    showToast('Saved locally. (Run supabase_schema.sql in Supabase to sync remote table)', 'warning');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Save Services & Highlights';
+    }
+  }
+}
+
 export async function handleSaveSiteSettings(e) {
   if (e) e.preventDefault();
 
   const settings = {
+    ...currentSettings,
     company_name: document.getElementById('cfg-company-name').value.trim(),
     email: document.getElementById('cfg-email').value.trim(),
     phone: document.getElementById('cfg-phone').value.trim(),
@@ -647,19 +866,23 @@ export async function handleLogout() {
 // Tab switcher for Admin CMS
 export function switchTab(tab) {
   const contentTab = document.getElementById('admin-tab-content');
+  const servicesTab = document.getElementById('admin-tab-services');
   const socialTab = document.getElementById('admin-tab-social');
   const appsTab = document.getElementById('admin-tab-apps');
 
   const btnContent = document.getElementById('tab-btn-content');
+  const btnServices = document.getElementById('tab-btn-services');
   const btnSocial = document.getElementById('tab-btn-social');
   const btnApps = document.getElementById('tab-btn-apps');
 
   // Reset all tabs
   if (contentTab) contentTab.style.display = 'none';
+  if (servicesTab) servicesTab.style.display = 'none';
   if (socialTab) socialTab.style.display = 'none';
   if (appsTab) appsTab.style.display = 'none';
 
   btnContent?.classList.remove('active');
+  btnServices?.classList.remove('active');
   btnSocial?.classList.remove('active');
   btnApps?.classList.remove('active');
 
@@ -667,6 +890,10 @@ export function switchTab(tab) {
     if (contentTab) contentTab.style.display = 'block';
     btnContent?.classList.add('active');
     populateSettingsForm(currentSettings);
+  } else if (tab === 'services') {
+    if (servicesTab) servicesTab.style.display = 'block';
+    btnServices?.classList.add('active');
+    populateServicesForm(currentSettings);
   } else if (tab === 'social') {
     if (socialTab) socialTab.style.display = 'block';
     btnSocial?.classList.add('active');
@@ -1146,7 +1373,6 @@ export async function handleContactSubmit(e) {
   }
 }
 
-// Global actions for inline event compatibility
 window.appActions = {
   editApp: editAppById,
   toggleStatus: toggleAppStatus,
@@ -1157,6 +1383,12 @@ window.appActions = {
   switchTab: switchTab,
   saveSiteSettings: handleSaveSiteSettings,
   loadSiteSettings: () => populateSettingsForm(currentSettings),
+  saveServicesSettings: handleSaveServicesSettings,
+  loadServicesSettings: () => populateServicesForm(currentSettings),
+  addServiceRow: addServiceRow,
+  removeServiceRow: removeServiceRow,
+  addValueRow: addValueRow,
+  removeValueRow: removeValueRow,
   saveSocialLinks: handleSaveSocialLinks,
   loadSocialLinks: () => populateSocialForm(currentSocialLinks),
   handleEmailCTA: handleEmailCTA,

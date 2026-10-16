@@ -135,7 +135,47 @@ VALUES
     "hero_title": "Crafting high-performance mobile and digital solutions",
     "hero_desc": "At Nine Star Technologies, we design and engineer scalable Android applications, intuitive web platforms, and smart digital utilities for everyday users and modern businesses.",
     "about_title": "About us",
-    "about_desc": "Nine Star Technologies is an independent technology and software development company focused on building reliable mobile applications and modern digital infrastructure. We specialize in cross-platform app architecture, native Android experiences, and secure cloud integrations, delivering tools that simplify productivity, finance, and daily life."
+    "about_desc": "Nine Star Technologies is an independent technology and software development company focused on building reliable mobile applications and modern digital infrastructure. We specialize in cross-platform app architecture, native Android experiences, and secure cloud integrations, delivering tools that simplify productivity, finance, and daily life.",
+    "services_list": [
+      {
+        "icon": "★",
+        "title": "Android and cross-platform apps",
+        "desc": "Native Android and Flutter apps built for speed, stability, and long-term maintenance, ready for Google Play.",
+        "is_big": true
+      },
+      {
+        "icon": "★",
+        "title": "Web platforms",
+        "desc": "Responsive websites and dashboards with clean interfaces and fast load times.",
+        "is_big": false
+      },
+      {
+        "icon": "★",
+        "title": "Cloud and automation",
+        "desc": "Secure cloud integrations and automation that remove repetitive business work.",
+        "is_big": false
+      },
+      {
+        "icon": "★",
+        "title": "UI and UX design",
+        "desc": "Interfaces that feel simple on day one and still hold up as your product grows.",
+        "is_big": true
+      }
+    ],
+    "company_values": [
+      {
+        "title": "Cross-platform architecture",
+        "desc": "One codebase, consistent quality on every device."
+      },
+      {
+        "title": "Native Android experiences",
+        "desc": "Fast, stable apps built for real phones."
+      },
+      {
+        "title": "Secure cloud integrations",
+        "desc": "Reliable back ends your data can trust."
+      }
+    ]
   }'::jsonb
 )
 ON CONFLICT (key) DO NOTHING;

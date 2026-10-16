@@ -1,7 +1,7 @@
 import './style.css';
 import { supabase } from './supabase.js';
 
-// Apps catalog defaults - 100% dynamic from Supabase database
+// Default seed apps in case remote database is syncing
 const DEFAULT_APPS = [];
 
 // Default site settings / general content
@@ -11,11 +11,11 @@ const DEFAULT_SITE_SETTINGS = {
   phone: '+000 0000 000000',
   address: 'Bhatia Zahirkona, Niamatpur, Karimganj, Kishoreganj 2310, Dhaka Division, Bangladesh',
   trade_license: 'No. 20262320000465, Dehunda Union Parishad, Karimganj, Kishoreganj',
-  hero_kicker: 'Software, Android Apps & Cloud Systems',
-  hero_title: 'Crafting High-Performance Software, Android Apps & Cloud Systems',
-  hero_desc: 'A software and technology studio dedicated to building resilient mobile architectures, intuitive digital platforms, and scalable cloud solutions.',
+  hero_kicker: 'Software studio for Android, web and cloud',
+  hero_title: 'Crafting high-performance mobile and digital solutions',
+  hero_desc: 'At Nine Star Technologies, we design and engineer scalable Android applications, intuitive web platforms, and smart digital utilities for everyday users and modern businesses.',
   about_title: 'About us',
-  about_desc: 'Nine Star Technologies is an independent software studio specializing in native Android engineering, full-stack web architectures, secure cloud backend integrations, and privacy-first digital platforms.'
+  about_desc: 'Nine Star Technologies is an independent technology and software development company focused on building reliable mobile applications and modern digital infrastructure. We specialize in cross-platform app architecture, native Android experiences, and secure cloud integrations, delivering tools that simplify productivity, finance, and daily life.'
 };
 
 // Preset Social Media Platforms & Default state
@@ -57,333 +57,25 @@ let supabaseClient = supabase;
 let currentSession = null;
 let currentSettings = { ...DEFAULT_SITE_SETTINGS };
 let currentSocialLinks = { ...DEFAULT_SOCIAL_LINKS };
+let io = null;
+
 // ==============================================================================
-// 1. ROUTING, PRIVACY POLICY VIEWER & UI INTERACTIONS
+// 1. ROUTING & UI INTERACTIONS
 // ==============================================================================
-
-// Helper: Find app from cache or defaults by ID, package ID, or slug
-export function findAppByIdOrSlug(query) {
-  if (!query) return null;
-  const q = String(query).trim().toLowerCase();
-  const allApps = getLocalApps();
-  return allApps.find(app => {
-    const idMatch = String(app.id || '').toLowerCase() === q;
-    const slugMatch = String(app.slug || '').toLowerCase() === q;
-    const pkgMatch = String(extractPackageId(app.play_store_url || '') || '').toLowerCase() === q;
-    const titleMatch = String(app.title || '').toLowerCase() === q || String(app.title || '').toLowerCase().replace(/[^a-z0-9]/g, '') === q.replace(/[^a-z0-9]/g, '');
-    return idMatch || slugMatch || pkgMatch || titleMatch;
-  }) || null;
-}
-
-// Lightweight, secure Markdown/Text to HTML parser (no heavyweight bundle dependencies)
-export function parseAppMarkdown(md) {
-  if (!md) return '';
-  // Check if string is already HTML formatted
-  if (/<(div|p|h[1-6]|ul|ol|table|section)[^>]*>/i.test(md)) {
-    return md;
-  }
-
-  const lines = md.split('\n');
-  const out = [];
-  let inUl = false;
-  let inOl = false;
-
-  for (let rawLine of lines) {
-    let line = rawLine.trim();
-
-    // Blank line
-    if (!line) {
-      if (inUl) { out.push('</ul>'); inUl = false; }
-      if (inOl) { out.push('</ol>'); inOl = false; }
-      continue;
-    }
-
-    // Headings
-    if (line.startsWith('### ')) {
-      if (inUl) { out.push('</ul>'); inUl = false; }
-      if (inOl) { out.push('</ol>'); inOl = false; }
-      out.push(`<h3>${inlineFormat(escapeHtml(line.slice(4)))}</h3>`);
-      continue;
-    }
-    if (line.startsWith('## ')) {
-      if (inUl) { out.push('</ul>'); inUl = false; }
-      if (inOl) { out.push('</ol>'); inOl = false; }
-      out.push(`<h2>${inlineFormat(escapeHtml(line.slice(3)))}</h2>`);
-      continue;
-    }
-    if (line.startsWith('# ')) {
-      if (inUl) { out.push('</ul>'); inUl = false; }
-      if (inOl) { out.push('</ol>'); inOl = false; }
-      out.push(`<h1>${inlineFormat(escapeHtml(line.slice(2)))}</h1>`);
-      continue;
-    }
-
-    // Unordered List (* or -)
-    if (/^[\*\-]\s+/.test(line)) {
-      if (inOl) { out.push('</ol>'); inOl = false; }
-      if (!inUl) { out.push('<ul>'); inUl = true; }
-      const content = line.replace(/^[\*\-]\s+/, '');
-      out.push(`<li>${inlineFormat(escapeHtml(content))}</li>`);
-      continue;
-    }
-
-    // Ordered List (1. 2.)
-    if (/^\d+\.\s+/.test(line)) {
-      if (inUl) { out.push('</ul>'); inUl = false; }
-      if (!inOl) { out.push('<ol>'); inOl = true; }
-      const content = line.replace(/^\d+\.\s+/, '');
-      out.push(`<li>${inlineFormat(escapeHtml(content))}</li>`);
-      continue;
-    }
-
-    // Blockquote (> text)
-    if (line.startsWith('> ')) {
-      if (inUl) { out.push('</ul>'); inUl = false; }
-      if (inOl) { out.push('</ol>'); inOl = false; }
-      out.push(`<blockquote>${inlineFormat(escapeHtml(line.slice(2)))}</blockquote>`);
-      continue;
-    }
-
-    // Standard paragraph
-    if (inUl) { out.push('</ul>'); inUl = false; }
-    if (inOl) { out.push('</ol>'); inOl = false; }
-    out.push(`<p>${inlineFormat(escapeHtml(line))}</p>`);
-  }
-
-  if (inUl) out.push('</ul>');
-  if (inOl) out.push('</ol>');
-
-  return out.join('\n');
-}
-
-// Inline formatting helper (bold, italic, code, links)
-function inlineFormat(str) {
-  return str
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/__(.*?)__/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/_([^_]+)_/g, '<em>$1</em>')
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:underline">$1</a>')
-    .replace(/\[([^\]]+)\]\((mailto:[^\s\)]+)\)/g, '<a href="$2" style="color:var(--gold);text-decoration:underline">$1</a>');
-}
-
-// Synthesizes a compliant default policy for apps without explicit custom content
-export function generateDefaultAppPolicy(app) {
-  const title = app.title || 'Mobile Application';
-  const pkgId = app.slug || extractPackageId(app.play_store_url || '') || 'com.ninestar.app';
-  const category = app.category || 'Mobile application';
-  const desc = app.description || 'Modern mobile application built by Nine Star Technologies.';
-
-  return `# Privacy Policy for ${title}
-
-**Effective Date:** October 2026  
-**Developer & Publisher:** Nine Star Technologies  
-**Category:** ${category}  
-**Application ID:** ${pkgId}  
-
-### 1. Overview & Core Mission
-Nine Star Technologies develops and publishes **${title}**. We believe user privacy is a fundamental right. This Privacy Policy details how **${title}** collects, handles, stores, and protects user data in strict compliance with the **Google Play Developer Program Policies**, the General Data Protection Regulation (GDPR), and the California Consumer Privacy Act (CCPA).
-
-### 2. Application Functionality & Scope
-* **App Description:** ${desc}
-* **Data Processing Model:** ${title} processes user requests with a privacy-first approach, utilizing on-device local storage and minimal network operations necessary solely to deliver app functions.
-
-### 3. Permissions Declared & Reasons for Access
-Depending on the specific features configured within ${title}, the application may request:
-* **INTERNET / ACCESS_NETWORK_STATE:** Used strictly for establishing secure TLS/HTTPS connections for feature data delivery, bug diagnostics, or optional account synchronization.
-* **POST_NOTIFICATIONS (Android 13+):** Used solely to deliver timely alarms, user-scheduled task updates, or critical feature notifications initiated by the user.
-* **WAKE_LOCK / SCHEDULE_EXACT_ALARM:** Ensures scheduled alerts and notifications fire with precision at user-defined moments.
-
-### 4. Third-Party Services & SDK Integrations
-${title} integrates only with established, audited service partners:
-* **Google Play Services:** Core platform architecture, safety verification, and app updates.
-* **Firebase Crashlytics & Diagnostics:** Anonymous stability telemetry and crash stack traces to identify and repair device-specific defects.
-* **Supabase / Cloud Infrastructure (Optional):** If user login or cloud sync is utilized, authentication tokens and synchronized content are encrypted with industry-standard protocols.
-
-### 5. Financial & Personal Data Protections
-* **Zero Sale of User Data:** We do NOT sell, rent, trade, or monetize your personal or behavioral data to third-party brokers, tracking aggregators, or unauthorized ad networks.
-* **Local Data Sovereignty:** Any user notes, preferences, or personal metrics generated in ${title} are primarily housed in the application's secure sandbox on your physical device.
-
-### 6. User Rights & Data Deletion (Google Play Compliance)
-You have complete sovereignty over your information:
-* **On-Device Data:** You can purge all cached and local app data at any moment through your device's operating system (*Settings > Apps > ${title} > Storage & Cache > Clear Data*).
-* **Cloud & Account Deletion:** To permanently delete any cloud-synced profile data or telemetry records associated with your account, please submit a request to **support@ninestartech.com** with the subject line *"Data Deletion Request - ${title}"*. Requests are verified and honored within 30 days without undue delay.
-
-### 7. Developer Contact Information
-For questions, compliance inquiries, or technical support regarding **${title}**, contact:  
-* **Publisher:** Nine Star Technologies  
-* **Support Email:** support@ninestartech.com  
-* **Official Website:** https://ninestar-portal.vercel.app`;
-}
-
-// Dynamically renders the #privacy-policy view based on URL query
-export function renderPrivacyPolicyView(appParam) {
-  const container = document.getElementById('privacy-policy');
-  if (!container) return;
-
-  // Cache static global policy if not cached yet
-  if (!container.dataset.globalPolicyHtml) {
-    const defaultCard = container.querySelector('.legal-doc-card');
-    if (defaultCard) {
-      container.dataset.globalPolicyHtml = defaultCard.innerHTML;
-    }
-  }
-
-  // Case 1: App parameter specified -> Render per-app privacy policy
-  if (appParam) {
-    const app = findAppByIdOrSlug(appParam);
-
-    let docHtml = '';
-    const backNav = `
-      <div class="app-policy-nav">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <a href="#top" class="btn ghost small" data-home>← Back to All Apps</a>
-          <a href="#privacy-policy" class="btn ghost small">View Company Policy</a>
-        </div>
-        ${app && app.play_store_url ? `
-          <a href="${escapeHtml(app.play_store_url)}" target="_blank" rel="noopener noreferrer" class="btn small">
-            View on Google Play ↗
-          </a>
-        ` : ''}
-      </div>
-    `;
-
-    if (app) {
-      const rawPolicy = app.privacy_policy_content && app.privacy_policy_content.trim()
-        ? app.privacy_policy_content
-        : generateDefaultAppPolicy(app);
-
-      const parsedContent = parseAppMarkdown(rawPolicy);
-      const pkgId = app.slug || extractPackageId(app.play_store_url || '') || 'com.ninestar.app';
-
-      docHtml = `
-        ${backNav}
-        <div class="legal-doc-card" style="background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:clamp(24px, 5vw, 48px);box-shadow:0 12px 36px -12px rgba(0,0,0,0.25);max-width:54em;margin:0 auto">
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-            <div class="app-policy-badge">Google Play Developer Compliant</div>
-            <span style="font-size:12px;color:var(--muted)">App-Specific Policy</span>
-          </div>
-
-          <div class="policy-quick-facts">
-            <div class="policy-fact-item">
-              <span class="policy-fact-label">Application</span>
-              <span class="policy-fact-val">${escapeHtml(app.title)}</span>
-            </div>
-            <div class="policy-fact-item">
-              <span class="policy-fact-label">Publisher</span>
-              <span class="policy-fact-val">Nine Star Technologies</span>
-            </div>
-            <div class="policy-fact-item">
-              <span class="policy-fact-label">Package Identifier</span>
-              <span class="policy-fact-val" style="font-family:monospace">${escapeHtml(pkgId)}</span>
-            </div>
-            <div class="policy-fact-item">
-              <span class="policy-fact-label">Category</span>
-              <span class="policy-fact-val">${escapeHtml(app.category || 'Mobile application')}</span>
-            </div>
-          </div>
-
-          <div class="policy-render-wrap">
-            ${parsedContent}
-          </div>
-
-          <div style="margin-top:36px;padding-top:20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
-            <a href="#privacy-policy" style="color:var(--gold);font-size:14px;font-weight:600">← Back to Global Organization Policy</a>
-            <a href="#top" style="color:var(--muted);font-size:14px" data-home>Return to Home Catalog</a>
-          </div>
-        </div>
-      `;
-    } else {
-      // App slug not found: show compliant fall-back view with link to full policy
-      docHtml = `
-        ${backNav}
-        <div class="legal-doc-card" style="background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:clamp(24px, 5vw, 48px);box-shadow:0 12px 36px -12px rgba(0,0,0,0.25);max-width:54em;margin:0 auto;text-align:center">
-          <div style="font-size:42px;margin-bottom:12px">🛡️</div>
-          <h1 style="margin:0 0 10px">Application Privacy Policy</h1>
-          <p style="color:var(--muted);margin-bottom:24px">
-            You navigated to the privacy policy for application: <strong style="color:var(--gold)">${escapeHtml(appParam)}</strong>.
-          </p>
-          <div style="background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:20px;text-align:left;margin-bottom:28px">
-            <h3 style="margin:0 0 8px;font-size:16px">Nine Star Technologies Developer Commitment:</h3>
-            <p style="font-size:14.5px;line-height:1.7;margin:0 0 12px">
-              All applications published under Nine Star Technologies operate under strict Google Play Developer Program Policies. We do not sell user data, we require minimal device permissions, and we grant complete data deletion rights.
-            </p>
-            <p style="font-size:14px;color:var(--muted);margin:0">
-              For complete details, please read our Global Organization Policy or contact our privacy desk directly.
-            </p>
-          </div>
-          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-            <a href="#privacy-policy" class="btn">View Global Organization Policy</a>
-            <a href="#top" class="btn ghost" data-home>Back to Home</a>
-          </div>
-        </div>
-      `;
-    }
-
-    container.innerHTML = docHtml;
-
-    // Attach home links listener on dynamic view
-    container.querySelectorAll('[data-home]').forEach(a => {
-      a.addEventListener('click', () => {
-        document.body.classList.remove('policy');
-        document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
-      });
-    });
-
-    document.title = app 
-      ? `Privacy Policy for ${app.title} | Nine Star Technologies`
-      : `Application Privacy Policy | Nine Star Technologies`;
-
-  } else {
-    // Case 2: No app parameter -> Restore standard Nine Star Technologies Global Policy
-    document.title = 'Privacy Policy | Nine Star Technologies';
-    if (container.dataset.globalPolicyHtml) {
-      container.innerHTML = `
-        <div style="margin-bottom:24px">
-          <a href="#top" class="btn ghost small" data-home>← Back to home</a>
-        </div>
-        <div class="legal-doc-card" style="background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:clamp(24px, 5vw, 48px);box-shadow:0 12px 36px -12px rgba(0,0,0,0.25);max-width:54em;margin:0 auto">
-          ${container.dataset.globalPolicyHtml}
-        </div>
-        <p style="margin-top:24px;text-align:center"><a href="#top" class="btn ghost small" data-home>Back to home</a></p>
-      `;
-      container.querySelectorAll('[data-home]').forEach(a => {
-        a.addEventListener('click', () => {
-          document.body.classList.remove('policy');
-          document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
-        });
-      });
-    }
-  }
-}
-
 export function handleRouting() {
-  const fullHash = window.location.hash.slice(1);
-  const [hashBase, queryString] = fullHash.split('?');
-  const params = new URLSearchParams(queryString || '');
-  const appParam = params.get('app');
-
-  const isPrivacy = hashBase === 'privacy' || hashBase === 'privacy-policy';
-  const isTerms = hashBase === 'terms-and-conditions' || hashBase === 'terms';
-  const isAdmin = hashBase === 'admin';
-  const isPolicy = isPrivacy || isTerms || isAdmin;
-
+  const hash = window.location.hash.slice(1);
+  const isPolicy = hash === 'privacy-policy' || hash === 'terms-and-conditions' || hash === 'admin';
   document.body.classList.toggle('policy', isPolicy);
 
-  // Toggle pages with transition reset (Only policy / admin pages)
+  // Toggle pages with transition reset
   document.querySelectorAll('.page').forEach(x => {
-    let isTarget = false;
-    if (isAdmin && x.id === 'page-admin') isTarget = true;
-    else if (isPrivacy && x.id === 'privacy-policy') isTarget = true;
-    else if (isTerms && x.id === 'terms-and-conditions') isTarget = true;
-
+    const isTarget = (hash === 'admin' && x.id === 'page-admin') || (x.id === hash);
     if (isTarget) {
       x.classList.remove('active');
-      void x.offsetWidth; // Trigger reflow for clean CSS animation replay
+      // Trigger browser reflow for clean CSS animation replay
+      void x.offsetWidth;
       x.classList.add('active');
-      if (isAdmin) checkAdminAuthState();
-      if (isPrivacy) renderPrivacyPolicyView(appParam);
+      if (hash === 'admin') checkAdminAuthState();
     } else {
       x.classList.remove('active');
     }
@@ -391,21 +83,13 @@ export function handleRouting() {
 
   if (isPolicy) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  } else if (hashBase && hashBase !== 'top') {
-    // Normal section anchor navigation (#about, #products, #services, #process, #contact)
-    document.title = 'Nine Star Technologies | Software, Android Apps & Cloud Systems';
-    const el = document.getElementById(hashBase);
+  } else if (hash && hash !== 'top') {
+    const el = document.getElementById(hash);
     if (el) {
-      setTimeout(() => {
-        el.scrollIntoView({ behavior: 'smooth' });
-        reveal();
-      }, 50);
-    } else {
-      reveal();
+      setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 50);
     }
   } else {
-    // Returning to top of home view
-    document.title = 'Nine Star Technologies | Official Developer Organization';
+    // Returning to home view: refresh reveal states
     setTimeout(() => reveal(), 80);
   }
 }
@@ -796,11 +480,6 @@ export async function fetchPublicApps() {
   const grid = document.getElementById('apps-grid');
   if (!grid) return;
 
-  // Purge any legacy stale cache keys
-  localStorage.removeItem('ninestar_apps');
-  localStorage.removeItem('cached_apps');
-  localStorage.removeItem('apps');
-
   try {
     const { data, error } = await supabaseClient
       .from('apps')
@@ -810,21 +489,12 @@ export async function fetchPublicApps() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    
-    // Check if database returned 0 rows
-    if (!data || data.length === 0) {
-      localStorage.setItem('ninestar_cached_apps', JSON.stringify([]));
-      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gold);"><p>Verified applications synced from Google Play Console will appear here.</p></div>';
-      return;
-    }
-
-    // Save active published apps to local cache for offline/instant policy routing
-    localStorage.setItem('ninestar_cached_apps', JSON.stringify(data));
-    renderPublicApps(data);
+    renderPublicApps(data || []);
     return;
   } catch (err) {
-    console.warn('Could not fetch apps from Supabase live:', err);
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gold);"><p>Verified applications synced from Google Play Console will appear here.</p></div>';
+    console.warn('Could not fetch apps from Supabase, using local defaults:', err);
+    const local = getLocalApps().filter(a => a.status === 'published');
+    renderPublicApps(local);
   }
 }
 
@@ -833,7 +503,13 @@ export function renderPublicApps(apps) {
   if (!grid) return;
 
   if (!apps || apps.length === 0) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gold);"><p>Verified applications synced from Google Play Console will appear here.</p></div>';
+    grid.innerHTML = `
+      <article class="card rv on" style="grid-column:1/-1;text-align:center;padding:48px 24px">
+        <div class="icon" style="margin:0 auto 16px">★</div>
+        <h3>Software Catalog Updating</h3>
+        <p>Our engineering team is currently deploying our latest Google Play builds. Please check back shortly.</p>
+      </article>
+    `;
     return;
   }
 
@@ -857,12 +533,9 @@ export function renderPublicApps(apps) {
         ` : `
           <a class="btn ghost small" href="#contact" data-home>Learn more</a>
         `}
-        ${(() => {
-          const directPolicyUrl = (app.privacy_policy_url && app.privacy_policy_url !== '#privacy-policy')
-            ? app.privacy_policy_url
-            : `#privacy?app=${encodeURIComponent(app.slug || extractPackageId(app.play_store_url || '') || app.id)}`;
-          return `<a href="${escapeHtml(directPolicyUrl)}" class="btn ghost small">Privacy policy</a>`;
-        })()}
+        ${app.privacy_policy_url ? `
+          <a href="${escapeHtml(app.privacy_policy_url)}" class="btn ghost small">Privacy policy</a>
+        ` : ''}
       </div>
     </article>
     `;
@@ -1039,11 +712,6 @@ export async function fetchAppsList() {
       ? `<img src="${escapeHtml(app.icon_url)}" alt="${escapeHtml(app.title)}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;vertical-align:middle">`
       : `<span style="font-size:22px">${escapeHtml(app.icon_text || '★')}</span>`;
 
-    const appIdentifier = app.slug || extractPackageId(app.play_store_url || '') || app.id;
-    const policyUrl = (app.privacy_policy_url && app.privacy_policy_url !== '#privacy-policy')
-      ? app.privacy_policy_url
-      : `#privacy?app=${encodeURIComponent(appIdentifier)}`;
-
     return `
     <tr>
       <td style="text-align:center">${iconCell}</td>
@@ -1051,7 +719,6 @@ export async function fetchAppsList() {
         <strong style="color:var(--ink);font-size:15px">${escapeHtml(app.title)}</strong>
         <div style="font-size:12.5px;color:var(--muted)">${escapeHtml(app.category || 'Mobile application')}</div>
         ${app.badge ? `<span style="font-size:11px;color:var(--gold);font-weight:600">[${escapeHtml(app.badge)}]</span>` : ''}
-        ${app.slug ? `<div style="font-size:11px;font-family:monospace;color:var(--muted)">slug: ${escapeHtml(app.slug)}</div>` : ''}
       </td>
       <td>
         <span class="status-pill ${app.status}">${escapeHtml(app.status)}</span>
@@ -1059,9 +726,7 @@ export async function fetchAppsList() {
       <td>
         <div style="font-size:13px;display:flex;flex-direction:column;gap:3px">
           ${app.play_store_url ? `<a href="${escapeHtml(app.play_store_url)}" target="_blank" style="color:var(--gold)">Play Store ↗</a>` : '<span style="color:var(--muted)">No Store URL</span>'}
-          <a href="${escapeHtml(policyUrl)}" target="_blank" style="color:var(--ink);font-size:11px;text-decoration:underline">
-            ${escapeHtml(policyUrl)}
-          </a>
+          <span style="color:var(--muted);font-size:11px">${escapeHtml(app.privacy_policy_url || '#privacy-policy')}</span>
         </div>
       </td>
       <td>${app.sort_order ?? 0}</td>
@@ -1091,14 +756,7 @@ export async function handleSaveApp(e) {
   const sort_order = parseInt(document.getElementById('app-sort').value, 10) || 0;
   const description = document.getElementById('app-desc').value.trim();
   const play_store_url = document.getElementById('app-play-url').value.trim();
-  const slugInput = document.getElementById('app-slug') ? document.getElementById('app-slug').value.trim() : '';
-  const slug = slugInput || extractPackageId(play_store_url) || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const privacy_policy_content = document.getElementById('app-privacy-content') ? document.getElementById('app-privacy-content').value.trim() : '';
-  
-  let privacy_policy_url = document.getElementById('app-privacy-url').value.trim();
-  if (!privacy_policy_url || privacy_policy_url === '#privacy-policy') {
-    privacy_policy_url = `#privacy?app=${encodeURIComponent(slug || id || 'app')}`;
-  }
+  const privacy_policy_url = document.getElementById('app-privacy-url').value.trim() || '#privacy-policy';
   const terms_url = document.getElementById('app-terms-url').value.trim() || '#terms-and-conditions';
 
   const appData = {
@@ -1111,9 +769,7 @@ export async function handleSaveApp(e) {
     sort_order,
     description,
     play_store_url,
-    slug,
     privacy_policy_url,
-    privacy_policy_content,
     terms_url
   };
 
@@ -1132,28 +788,11 @@ export async function handleSaveApp(e) {
       showToast('Application added to live catalog!', 'success');
     }
 
-    // Keep local cache synced
-    const currentLocal = getLocalApps();
-    const updatedLocal = id
-      ? currentLocal.map(a => a.id === id ? { ...a, ...appData } : a)
-      : [...currentLocal, { id: 'local-' + Date.now(), ...appData }];
-    localStorage.setItem('ninestar_cached_apps', JSON.stringify(updatedLocal));
-
     resetAppForm();
     fetchAppsList();
     fetchPublicApps();
   } catch(err) {
-    console.warn('Database save notice, persisting to local storage:', err);
-    const currentLocal = getLocalApps();
-    const updatedLocal = id
-      ? currentLocal.map(a => a.id === id ? { ...a, ...appData } : a)
-      : [...currentLocal, { id: 'local-' + Date.now(), ...appData }];
-    localStorage.setItem('ninestar_cached_apps', JSON.stringify(updatedLocal));
-    showToast('Saved to local storage cache! (Syncing with Supabase when online)', 'warning');
-
-    resetAppForm();
-    fetchAppsList();
-    fetchPublicApps();
+    showToast(err.message || 'Error saving application', 'error');
   } finally {
     btn.disabled = false;
     btn.textContent = 'Save Application';
@@ -1185,17 +824,8 @@ export async function editAppById(id) {
   document.getElementById('app-sort').value = app.sort_order ?? 0;
   document.getElementById('app-desc').value = app.description || '';
   document.getElementById('app-play-url').value = app.play_store_url || '';
-  if (document.getElementById('app-slug')) {
-    document.getElementById('app-slug').value = app.slug || '';
-  }
-
-  const defaultPolicyLink = `#privacy?app=${encodeURIComponent(app.slug || extractPackageId(app.play_store_url || '') || app.id)}`;
-  document.getElementById('app-privacy-url').value = app.privacy_policy_url || defaultPolicyLink;
+  document.getElementById('app-privacy-url').value = app.privacy_policy_url || '#privacy-policy';
   document.getElementById('app-terms-url').value = app.terms_url || '#terms-and-conditions';
-
-  if (document.getElementById('app-privacy-content')) {
-    document.getElementById('app-privacy-content').value = app.privacy_policy_content || '';
-  }
 
   // Update preview card if app has icon_url
   const prevWrap = document.getElementById('play-preview-wrap');
@@ -1223,10 +853,8 @@ export function resetAppForm() {
   document.getElementById('form-app').reset();
   document.getElementById('app-id').value = '';
   document.getElementById('app-icon-url').value = '';
-  if (document.getElementById('app-slug')) document.getElementById('app-slug').value = '';
   document.getElementById('app-privacy-url').value = '#privacy-policy';
   document.getElementById('app-terms-url').value = '#terms-and-conditions';
-  if (document.getElementById('app-privacy-content')) document.getElementById('app-privacy-content').value = '';
   document.getElementById('app-icon').value = '★';
   document.getElementById('app-sort').value = '0';
   document.getElementById('form-app-heading').textContent = 'Add New Application';
@@ -1238,27 +866,6 @@ export function resetAppForm() {
 
   const statusEl = document.getElementById('play-scrape-status');
   if (statusEl) statusEl.textContent = '';
-}
-
-// Inserts a Google Play compliant Markdown privacy policy template into the editor
-export function insertCompliantPolicyTemplate() {
-  const title = document.getElementById('app-title')?.value.trim() || 'My Application';
-  const category = document.getElementById('app-category')?.value.trim() || 'Mobile application';
-  const desc = document.getElementById('app-desc')?.value.trim() || 'A productivity and utility tool for Android.';
-  const slug = document.getElementById('app-slug')?.value.trim() || 'com.ninestar.app';
-
-  const template = generateDefaultAppPolicy({
-    title,
-    category,
-    description: desc,
-    slug
-  });
-
-  const textarea = document.getElementById('app-privacy-content');
-  if (textarea) {
-    textarea.value = template;
-    showToast('Compliant privacy template generated and inserted!', 'success');
-  }
 }
 
 export async function toggleAppStatus(id, currentStatus) {
@@ -1555,8 +1162,7 @@ window.appActions = {
   handleEmailCTA: handleEmailCTA,
   handlePlayUrlInput: handlePlayUrlInput,
   clearScrapedIcon: clearScrapedIcon,
-  handleContactSubmit: handleContactSubmit,
-  insertPolicyTemplate: insertCompliantPolicyTemplate
+  handleContactSubmit: handleContactSubmit
 };
 
 // Lifecycle initialization
@@ -1602,7 +1208,6 @@ window.addEventListener('DOMContentLoaded', () => {
   // Attach submit listeners
   document.getElementById('form-login')?.addEventListener('submit', handleLogin);
   document.getElementById('form-app')?.addEventListener('submit', handleSaveApp);
-  document.getElementById('btn-gen-policy-template')?.addEventListener('click', insertCompliantPolicyTemplate);
 
   // Secret shortcut: Press Ctrl + Shift + A to open Admin CMS
   window.addEventListener('keydown', (e) => {
@@ -1611,11 +1216,6 @@ window.addEventListener('DOMContentLoaded', () => {
       window.location.hash = '#admin';
     }
   });
-
-  // Purge any stale cache keys immediately on load
-  localStorage.removeItem('ninestar_apps');
-  localStorage.removeItem('cached_apps');
-  localStorage.removeItem('apps');
 
   handleRouting();
   reveal();
